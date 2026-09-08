@@ -74,7 +74,7 @@ $$
 trong đó $w$ là kernel học được, $b$ là bias và $\phi$ thường là ReLU:
 
 $$
-\operatorname{ReLU}(z)=\max(0,z).
+\mathrm{ReLU}(z)=\max(0,z).
 $$
 
 Chia sẻ trọng số giúp CNN phát hiện cùng một đặc trưng ở nhiều vị trí. Các
@@ -300,7 +300,7 @@ cần giữ MAE có trọng số như trên [1,9].
 tối hoặc quá sáng. Với hai percentile $q_{\min}$ và $q_{\max}$:
 
 $$
-I'(p)=\operatorname{clip}\left(
+I'(p)=\mathrm{clip}\left(
 \frac{I(p)-q_{\min}}{q_{\max}-q_{\min}+\varepsilon},0,1
 \right).
 $$
@@ -334,7 +334,7 @@ Giả sử có các proposal $(P_i,s_i)$ với $s_i=\widehat d(p_i)$. Quy trình
 Một độ đo overlap thường dùng là
 
 $$
-\operatorname{IoU}(P_i,P_j)=
+\mathrm{IoU}(P_i,P_j)=
 \frac{|P_i\cap P_j|}{|P_i\cup P_j|}.
 $$
 
@@ -464,7 +464,7 @@ marker. Thực hiện watershed trên $-D$ bên trong mask $B$:
 
 $$
 \widehat Y_{\mathrm{WS}}
-=\operatorname{Watershed}(-D,\,M,\,\text{mask}=B),
+=\mathrm{Watershed}(-D,\,M,\,\text{mask}=B),
 $$
 
 trong đó $M$ là ảnh marker. Watershed có thể tách các blob đang chạm nhau,
@@ -505,12 +505,12 @@ cùng định dạng đầu ra và cùng metric instance.
 Với ground-truth instance $G_i$ và predicted instance $P_j$:
 
 $$
-\operatorname{IoU}_{ij}
+\mathrm{IoU}_{ij}
 =\frac{|G_i\cap P_j|}{|G_i\cup P_j|}.
 $$
 
 Tại ngưỡng $\tau$, một cặp là đúng nếu
-$\operatorname{IoU}_{ij}\ge\tau$. Matching phải là một-một; có thể giải bài
+$\mathrm{IoU}_{ij}\ge\tau$. Matching phải là một-một; có thể giải bài
 toán gán tối ưu để tối đa số cặp đạt ngưỡng, rồi dùng tổng IoU làm tiêu chí
 phụ khi hoà [9]. Sau matching:
 
@@ -521,12 +521,12 @@ phụ khi hoà [9]. Sau matching:
 ### 2.10.2. Precision, Recall, F1 và AP theo StarDist
 
 $$
-\operatorname{Precision}_{\tau}
+\mathrm{Precision}_{\tau}
 =\frac{TP_{\tau}}{TP_{\tau}+FP_{\tau}},
 $$
 
 $$
-\operatorname{Recall}_{\tau}
+\mathrm{Recall}_{\tau}
 =\frac{TP_{\tau}}{TP_{\tau}+FN_{\tau}},
 $$
 
@@ -557,9 +557,9 @@ $$
 Gộp mọi instance thành foreground $G$ và $P$:
 
 $$
-\operatorname{Dice}=
+\mathrm{Dice}=
 \frac{2|G\cap P|}{|G|+|P|},\qquad
-\operatorname{IoU}_{fg}=
+\mathrm{IoU}_{fg}=
 \frac{|G\cap P|}{|G\cup P|}.
 $$
 
@@ -572,7 +572,7 @@ sung, không nên là kết quả chính.
 Với tập cặp đã match:
 
 $$
-PQ=\frac{\sum_{(i,j)\in TP}\operatorname{IoU}(G_i,P_j)}
+PQ=\frac{\sum_{(i,j)\in TP}\mathrm{IoU}(G_i,P_j)}
 {|TP|+\frac12|FP|+\frac12|FN|}.
 $$
 
@@ -585,7 +585,7 @@ $$
 trong đó
 
 $$
-SQ=\frac{1}{|TP|}\sum_{(i,j)\in TP}\operatorname{IoU}(G_i,P_j),
+SQ=\frac{1}{|TP|}\sum_{(i,j)\in TP}\mathrm{IoU}(G_i,P_j),
 $$
 
 $$
