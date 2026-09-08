@@ -1,0 +1,25 @@
+name: Đề xuất thí nghiệm
+description: Đề xuất một thí nghiệm hoặc ablation mới
+title: "[Experiment]: "
+labels: [experiment]
+body:
+  - type: textarea
+    id: hypothesis
+    attributes:
+      label: Giả thuyết
+    validations:
+      required: true
+  - type: textarea
+    id: protocol
+    attributes:
+      label: Protocol
+      description: Dataset split, phương pháp, tham số và metric.
+    validations:
+      required: true
+  - type: textarea
+    id: outputs
+    attributes:
+      label: Sản phẩm mong đợi
+      description: Bảng, biểu đồ, label image hoặc kết luận cần tạo.
+    validations:
+      required: true

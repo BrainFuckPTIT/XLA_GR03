@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+# Environments and local secrets
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Large or generated project artifacts
+data/raw/**
+data/ground_truth/**
+data/processed/**
+!data/raw/.gitkeep
+!data/ground_truth/.gitkeep
+!data/processed/.gitkeep
+models/**/*.h5
+models/**/*.hdf5
+models/**/*.zip
+models/**/*.pb
+models/**/saved_model*/
+results/tmp/
+results/predictions/
+outputs/

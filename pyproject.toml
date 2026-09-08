@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xla-gr03"
+version = "0.1.0"
+description = "Reproducible 2D instance segmentation experiments with StarDist, Otsu, and Watershed"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+  "imageio>=2.34",
+  "numpy>=1.26,<3",
+  "scikit-image>=0.22",
+  "scipy>=1.11",
+  "tifffile>=2024.2.12",
+]
+
+[project.optional-dependencies]
+stardist = [
+  "csbdeep>=0.8.1",
+  "stardist>=0.9.1",
+  "tensorflow>=2.16",
+]
+dev = [
+  "pytest>=8",
+  "pytest-cov>=5",
+  "ruff>=0.6",
+]
+
+[project.scripts]
+xla-gr03 = "xla_gr03.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers --cov=xla_gr03 --cov-report=term-missing"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

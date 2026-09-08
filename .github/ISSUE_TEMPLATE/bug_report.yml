@@ -1,0 +1,31 @@
+name: Báo lỗi
+description: Báo lỗi có thể tái hiện trong code hoặc workflow
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Mô tả
+      description: Kết quả thực tế và kết quả mong đợi.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Cách tái hiện
+      description: Lệnh, ảnh đầu vào và tham số tối thiểu để tái hiện.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Môi trường
+      description: Hệ điều hành, Python, Fiji, StarDist và TensorFlow.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log hoặc ảnh chụp
+      render: shell
