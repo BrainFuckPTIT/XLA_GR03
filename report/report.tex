@@ -188,18 +188,17 @@ runtime sau warm-up/model loading; ghi CPU/GPU. Script
 label StarDist Fiji nếu đã xuất.
 
 \chapter{Kết quả và thảo luận}
-\section{Kết quả demo tái lập được}
-Nhóm đã chạy thật ba phương pháp trên ảnh huỳnh quang và instance labels mẫu
-do package StarDist phân phối, có nguồn gốc từ Data Science Bowl 2018. Image
-có 125 instance ground-truth. StarDist Python dùng model `2D\_versatile\_fluo`,
-percentile $1/99.8$, probability threshold $0.5$ và NMS threshold $0.3$.
-Runtime CPU không tính tải model và warm-up. Toàn bộ TIFF labels, CSV và figure
-do lệnh `scripts/run_real_demo.py` sinh được lưu trong `results/real_demo/`.
-
-Demo gồm đúng một ảnh, nên SD, confidence interval và khẳng định tổng quát
-không có ý nghĩa. Các số dưới đây là bằng chứng pipeline chạy thật và minh hoạ
-cách đọc kết quả; benchmark cuối phải thay bằng test split nhiều ảnh, đồng thời
-giữ dòng Fiji là `NA` cho tới khi plugin xuất label TIFF thực tế.
+\section{Benchmark tái lập được trên DSB2018}
+Nhóm chạy ba phương pháp trên 50 ảnh của test split trong archive DSB2018 do
+StarDist công bố \citep{caicedo2019nucleus}. Ground truth là instance label
+TIFF; không dùng binary mask. Watershed chọn `min\_distance` bằng sweep trên 30
+ảnh lấy mẫu seed 42 từ 447 ảnh train, đạt AP@0.50 cao nhất tại giá trị 9. Các
+50 ảnh test không tham gia chọn tham số. StarDist Python dùng model
+`2D\_versatile\_fluo`, percentile $1/99.8$, default probability threshold
+$0.479071$ và NMS threshold $0.3$ từ model. Runtime CPU không tính tải model
+và warm-up. Toàn bộ CSV, figure và provenance do lệnh
+`scripts/run_dsb2018_benchmark.py` sinh được lưu trong
+`results/dsb2018_benchmark/`.
 
 \begin{longtable}{lrrrrrr}
 \caption{Kết quả test cuối, mean $\pm$ SD.}\label{tab:main}\\
@@ -207,37 +206,48 @@ giữ dòng Fiji là `NA` cho tới khi plugin xuất label TIFF thực tế.
 Method & AP@.50 & AP@.75 & AP@.90 & PQ@.50 & Dice & MAE count\\
 \midrule\endfirsthead
 \toprule Method & AP@.50 & AP@.75 & AP@.90 & PQ@.50 & Dice & MAE count\\\midrule\endhead
-Otsu & 0.357 & 0.181 & 0.025 & 0.397 & 0.843 & 41\\
-Watershed & 0.558 & 0.290 & 0.026 & 0.549 & 0.843 & 10\\
+Otsu & $0.643\pm0.238$ & $0.453\pm0.276$ & $0.223\pm0.221$ & $0.627\pm0.208$ & $0.895\pm0.070$ & 14.06\\
+Watershed & $0.715\pm0.199$ & $0.501\pm0.266$ & $0.214\pm0.207$ & $0.677\pm0.166$ & $0.894\pm0.071$ & 6.94\\
 StarDist Fiji & NA & NA & NA & NA & NA & NA\\
-StarDist Python & 0.944 & 0.800 & 0.168 & 0.827 & 0.926 & 7\\
+StarDist Python & $0.853\pm0.120$ & $0.692\pm0.235$ & $0.305\pm0.313$ & $0.785\pm0.110$ & $0.916\pm0.049$ & 3.44\\
 \bottomrule
 \end{longtable}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{../results/real_demo/figures/qualitative_comparison.png}
-\caption{Ảnh mẫu, ground truth và label predictions. Màu chỉ biểu diễn ID;
-không có ý nghĩa phân loại.}
-\label{fig:qualitative}
+\includegraphics[width=.72\textwidth]{../results/dsb2018_benchmark/figures/benchmark_ap_pq.png}
+\caption{Mean AP@0.50 và PQ@0.50 trên 50 ảnh test DSB2018. Error bar được
+trình bày trong Bảng \ref{tab:main}.}
+\label{fig:benchmark}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=.62\textwidth]{../results/real_demo/figures/threshold_vs_ap050.png}
-\caption{AP@0.50 khi quét probability threshold và NMS threshold trên ảnh demo.}
-\label{fig:sweep}
+\includegraphics[width=\textwidth]{../results/dsb2018_benchmark/figures/qualitative_median.png}
+\caption{Case trung vị theo AP@0.50 của StarDist trong 50 ảnh test. Màu biểu
+diễn ID instance, không phải lớp semantic. Otsu gộp nhiều nhân tiếp xúc;
+Watershed tách được một phần; StarDist bám theo instance ground truth sát hơn.}
+\label{fig:qualitative-median}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{../results/dsb2018_benchmark/figures/qualitative_low.png}
+\caption{Case có AP@0.50 thấp nhất của StarDist trong test split. Hình này
+được báo cáo cùng case trung vị để tránh chỉ chọn ví dụ thuận lợi.}
+\label{fig:qualitative-low}
 \end{figure}
 
 \section{Cách đọc kết quả}
-Trên ảnh demo, StarDist đạt AP@0.50 $0.944$ và PQ $0.827$, cao hơn Watershed
-($0.558$, $0.549$) và Otsu ($0.357$, $0.397$). Dice foreground của Otsu và
-Watershed đều $0.843$, nhưng AP instance thấp hơn nhiều: đây là ví dụ vì sao
-Dice toàn foreground không đủ để đánh giá tách object. Watershed giảm sai số
-đếm từ 41 xuống 10 so với Otsu; StarDist giảm tiếp còn 7. Ở $\tau=0.90$ mọi
-phương pháp đều giảm mạnh, cho thấy metric nghiêm ngặt nhạy với sai số biên.
-StarDist chậm hơn baseline trên CPU (0.155 s so với 0.047 s Watershed), nhưng
-đổi lại tách instance tốt hơn. Kết luận này chỉ áp dụng cho ảnh demo.
+Trên 50 ảnh test, StarDist đạt AP@0.50 $0.853\pm0.120$ và PQ
+$0.785\pm0.110$, cao hơn Watershed ($0.715\pm0.199$;
+$0.677\pm0.166$) và Otsu ($0.643\pm0.238$; $0.627\pm0.208$). Dice foreground
+của Otsu và Watershed gần $0.895$, nhưng AP instance thấp hơn: kết quả này
+cho thấy Dice toàn foreground không đủ để đánh giá tách object. Watershed giảm
+MAE đếm từ 14.06 xuống 6.94 so với Otsu; StarDist giảm tiếp còn 3.44. Ở
+$\tau=0.90$, metric của cả ba giảm mạnh, phản ánh yêu cầu chính xác biên rất
+nghiêm ngặt. StarDist chậm hơn baseline trên CPU (0.109 s/ảnh so với 0.023 s
+Watershed), đổi lại tách instance tốt hơn trên benchmark này.
 
 \section{Đe doạ tới tính hợp lệ}
 Model pretrained có thể không phù hợp stain/optics của dữ liệu. Khác biệt Fiji
@@ -277,14 +287,17 @@ python -m venv .venv
 .venv\Scripts\python.exe -m pytest -q
 .venv\Scripts\ruff.exe check src tests scripts
 \end{lstlisting}
-\section{Tạo lại kết quả demo}
+\section{Tạo lại kết quả và artefact}
 \begin{lstlisting}[language=Python]
 .venv\Scripts\python.exe scripts/run_real_demo.py
 \end{lstlisting}
-Script tải model `2D\_versatile\_fluo` qua API chính thức khi chưa có cache,
-materialize mẫu DSB2018 của StarDist, lưu label TIFF và tạo CSV/figures. Lần
-chạy đã ghi trong báo cáo dùng CPU Windows; TensorFlow native Windows từ 2.11
-không dùng CUDA, nên benchmark GPU phải ghi môi trường WSL2/Linux riêng.
+Lệnh benchmark chính là `scripts/run\_dsb2018\_benchmark.py`; nó tải archive
+DSB2018 và model `2D\_versatile\_fluo` qua API chính thức khi chưa có cache,
+lưu CSV, label TIFF minh hoạ và figures. Lần chạy đã ghi trong báo cáo dùng CPU
+Windows; TensorFlow native Windows từ 2.11 không dùng CUDA, nên benchmark GPU
+phải ghi môi trường WSL2/Linux riêng. Trước nộp, điền tên/MSSV/mã nhóm, chạy
+Fiji trên đúng input để lưu Label Image, ROI ZIP và run log, rồi xuất PDF từ
+nguồn này.
 
 \chapter{Mã nguồn cốt lõi}
 \section{Matching và metric instance}
@@ -293,4 +306,5 @@ không dùng CUDA, nên benchmark GPU phải ghi môi trường WSL2/Linux riên
 \lstinputlisting[language=Python,caption={`geometry.py`: EDT, ray distance, polygon decode và NMS.}]{../src/xla_gr03/geometry.py}
 \section{Script thí nghiệm chạy thật}
 \lstinputlisting[language=Python,caption={`run\_real\_demo.py`: materialize sample, inference, evaluation và figure.}]{../scripts/run_real_demo.py}
+\lstinputlisting[language=Python,caption={`run\_dsb2018\_benchmark.py`: validation, benchmark test split và tổng hợp kết quả.}]{../scripts/run_dsb2018_benchmark.py}
 \end{document}

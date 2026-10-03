@@ -36,7 +36,7 @@ def _otsu_mask(
     threshold = float(filters.threshold_otsu(filtered))
     mask = filtered > threshold if foreground == "bright" else filtered < threshold
     if closing_radius:
-        mask = morphology.binary_closing(mask, morphology.disk(closing_radius))
+        mask = morphology.closing(mask, footprint=morphology.disk(closing_radius))
     if min_size:
         try:
             # scikit-image >= 0.26 renamed the threshold and changed it to inclusive.

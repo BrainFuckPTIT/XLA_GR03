@@ -60,14 +60,17 @@ sang `uint32`.
 
 ## Kiểm thử
 
-Unit test không cần tải model StarDist và không cần GPU. Điều này giúp CI nhẹ,
-nhanh và ổn định. Inference StarDist sẽ được smoke-test riêng khi dataset và
-môi trường TensorFlow đã được chốt.
+Unit test dùng fake model nên không phải tải weight StarDist và không cần GPU;
+điều này giúp CI nhẹ, nhanh và ổn định. Test bao phủ wrapper, validation tham
+số và metadata threshold. Inference thật cũng đã chạy trong benchmark DSB2018
+50 ảnh test bằng model pretrained; kết quả được lưu ở
+`results/dsb2018_benchmark/`.
 
 ## Giới hạn hiện tại
 
 - Chỉ hỗ trợ ảnh 2D/YXC, phù hợp phạm vi Fiji StarDist 2D.
 - Chưa có train/fine-tune CNN; hiện dùng model pretrained.
-- Chưa có benchmark runtime trên dataset thật.
+- Runtime là CPU Windows sau warm-up; benchmark chưa đại diện cho GPU, WSL2 hay
+  mọi domain ảnh.
 - Reference polygon overlap được rasterize nên là xấp xỉ theo pixel.
 - Cấu hình YAML là hồ sơ tham số; CLI chưa tự đọc YAML ở phiên bản đầu.

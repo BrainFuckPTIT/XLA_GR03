@@ -29,6 +29,7 @@ Thumbs.db
 data/raw/**
 data/ground_truth/**
 data/processed/**
+data/dsb2018/
 !data/raw/.gitkeep
 !data/ground_truth/.gitkeep
 !data/processed/.gitkeep
@@ -42,6 +43,10 @@ results/predictions/
 outputs/
 node_modules/
 .slides-build/
+.chart-data-*/
 .external-stardist/
 .*.log
 slides/stardist_presentation.pptx
+slides/stardist_presentation_submission.pptx
+slides/stardist_presentation_submission_v2.pptx
+slides/stardist_presentation_submission_v3.pptx

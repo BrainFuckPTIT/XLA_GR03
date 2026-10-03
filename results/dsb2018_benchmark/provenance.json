@@ -1,0 +1,11 @@
+{
+  "dataset": "Official StarDist DSB2018 archive",
+  "archive_url": "https://github.com/stardist/stardist/releases/download/0.1.0/dsb2018.zip",
+  "train_images_for_validation": 30,
+  "test_images": 50,
+  "watershed_min_distance_selected_on_train": 9,
+  "stardist_model": "2D_versatile_fluo",
+  "stardist_threshold_policy": "model default thresholds; no test-set tuning",
+  "device": "CPU",
+  "qualitative_selection": "min/median/max StarDist AP@0.50 over all test images"
+}

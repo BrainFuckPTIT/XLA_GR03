@@ -1,0 +1,4 @@
+tag,image,stardist_ap_iou_050,selection_rule
+low,608ff81c8a0c8b622f6648a9c7f935d85f0c503f515ef2ac3728387be1953ee8.tif,0.47058823529411764,"min, median, or max StarDist AP@0.50 over the complete test split"
+median,b61d3fb0d0ebbee018346e0adeff9e9178f33aa95262779b3c196f93b4ace895.tif,0.8793103448275862,"min, median, or max StarDist AP@0.50 over the complete test split"
+high,d8607b21411c9c8ab532faaeba15f8818a92025897950f94ee4da4f74f53660a.tif,1.0,"min, median, or max StarDist AP@0.50 over the complete test split"

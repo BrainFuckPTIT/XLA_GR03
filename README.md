@@ -120,17 +120,22 @@ ruff check .
 - [Tổng hợp tài liệu](docs/02_tong_hop_tai_lieu.md)
 - [Phạm vi thành viên 2](docs/ke_hoach_thanh_vien_2.md)
 - [Thiết kế thí nghiệm và metric](docs/04_thiet_ke_thuc_nghiem.md)
+- [Trạng thái kiểm tra trước khi nộp](docs/05_trang_thai_nop_bai.md)
 - [Protocol Fiji/ImageJ](fiji/workflows/stardist_fiji_protocol.md)
 - [Báo cáo LaTeX](report/report.tex)
-- [Slide PowerPoint 10 trang](slides/stardist_presentation_final.pptx)
+- [Slide PowerPoint 10 trang](slides/stardist_presentation_submission_v4.pptx)
 
 ## Artefact nộp bài
 
 - `report/report.tex`: báo cáo nguồn, gồm lý thuyết, Fiji, Python, protocol,
-  metric, thảo luận và checklist. Bổ sung ảnh/biểu đồ từ lần chạy thật để đạt
-  khoảng 30 trang, sau đó xuất PDF.
-- `slides/stardist_presentation_final.pptx`: deck 10 slide, có thể chỉnh sửa,
-  bao gồm kết quả demo chạy thật.
+  metric, bảng benchmark và ảnh định tính từ lần chạy thật. Hoàn tất thông tin
+  nhóm, output Fiji và xuất PDF trước khi nộp.
+- `scripts/run_dsb2018_benchmark.py`: benchmark 50 test images DSB2018, có
+  validation tách biệt để chọn tham số Watershed.
+- `results/dsb2018_benchmark/`: CSV từng ảnh, bảng mean ± SD, validation sweep
+  và biểu đồ benchmark.
+- `slides/stardist_presentation_submission_v4.pptx`: deck 10 slide có thể
+  chỉnh sửa, gồm biểu đồ benchmark đa ảnh và ảnh phân đoạn thật.
 - `fiji/run_log_template.csv`: bắt buộc điền cho lần chạy plugin.
 - `results/tables/final_metrics_template.csv`: bảng kết quả cuối; không điền
   số liệu giả định.

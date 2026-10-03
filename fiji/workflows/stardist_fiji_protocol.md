@@ -11,8 +11,10 @@ binary mask, hoặc ROI đã raster hoá ở kích thước khác. Mỗi pixel n
 
 1. Cài Fiji bản ổn định từ [fiji.sc](https://fiji.sc/), ghi lại phiên bản tại
    `Help > About Fiji`.
-2. Chọn `Help > Update... > Manage update sites`, bật **StarDist**, rồi
-   `Apply changes` và khởi động lại Fiji.
+2. Chọn `Help > Update... > Manage update sites`, bật **CSBDeep**,
+   **StarDist** và **TensorFlow**, rồi `Apply changes` và khởi động lại Fiji.
+   Đây là ba update site mà trang plugin StarDist của ImageJ hướng dẫn cho
+   inference 2D.
 3. Mở `Help > About Plugins` hoặc hộp thoại StarDist, chụp lại phiên bản plugin
    và lưu vào `fiji/run_log_template.csv`.
 4. Mở một ảnh TIFF 2D. Kiểm tra kích thước, bit depth và kênh bằng

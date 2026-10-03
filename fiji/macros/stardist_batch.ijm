@@ -1,7 +1,7 @@
 // StarDist 2D batch protocol for Fiji/ImageJ.
 //
-// Before first use: Help > Update... > Manage update sites > enable "StarDist",
-// Apply changes, then restart Fiji. Record one interactive StarDist run with
+// Before first use: Help > Update... > Manage update sites > enable "CSBDeep",
+// "StarDist", and "TensorFlow", apply changes, then restart Fiji. Record one interactive StarDist run with
 // Plugins > Macros > Record to verify option names against the installed plugin
 // version. This macro deliberately stops before the StarDist dialog so that the
 // operator can select the exact model and export labels/ROIs reproducibly.
