@@ -1,5 +1,20 @@
 # Dữ liệu
 
+## Cấu trúc bắt buộc
+
+`raw/` và `ground_truth/` chứa các TIFF có **cùng basename**. Ground truth là
+label image integer 2D: nền `0`, mỗi instance là một ID dương. Ví dụ:
+
+```text
+data/raw/image_001.tif
+data/ground_truth/image_001.tif
+```
+
+Không dùng mask RGB để làm ground truth. Nếu nguồn cung cấp mỗi mask instance
+riêng, chuyển chúng thành một label TIFF rồi kiểm tra `max(label)` và overlay.
+Không commit dữ liệu bị hạn chế bản quyền; ghi URL, license, số ảnh và checksum
+trong manifest riêng khi nộp nội bộ.
+
 ```text
 data/
 ├── raw/             ảnh đầu vào nguyên bản

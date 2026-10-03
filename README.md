@@ -119,6 +119,21 @@ ruff check .
 - [Cơ sở lý thuyết StarDist](docs/01_ly_thuyet_stardist.md)
 - [Tổng hợp tài liệu](docs/02_tong_hop_tai_lieu.md)
 - [Phạm vi thành viên 2](docs/ke_hoach_thanh_vien_2.md)
+- [Thiết kế thí nghiệm và metric](docs/04_thiet_ke_thuc_nghiem.md)
+- [Protocol Fiji/ImageJ](fiji/workflows/stardist_fiji_protocol.md)
+- [Báo cáo LaTeX](report/report.tex)
+- [Slide PowerPoint 10 trang](slides/stardist_presentation_final.pptx)
+
+## Artefact nộp bài
+
+- `report/report.tex`: báo cáo nguồn, gồm lý thuyết, Fiji, Python, protocol,
+  metric, thảo luận và checklist. Bổ sung ảnh/biểu đồ từ lần chạy thật để đạt
+  khoảng 30 trang, sau đó xuất PDF.
+- `slides/stardist_presentation_final.pptx`: deck 10 slide, có thể chỉnh sửa,
+  bao gồm kết quả demo chạy thật.
+- `fiji/run_log_template.csv`: bắt buộc điền cho lần chạy plugin.
+- `results/tables/final_metrics_template.csv`: bảng kết quả cuối; không điền
+  số liệu giả định.
 - [Quy trình đóng góp](CONTRIBUTING.md)
 
 ## Nhóm thực hiện

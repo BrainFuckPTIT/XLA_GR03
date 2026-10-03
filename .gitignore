@@ -40,3 +40,8 @@ models/**/saved_model*/
 results/tmp/
 results/predictions/
 outputs/
+node_modules/
+.slides-build/
+.external-stardist/
+.*.log
+slides/stardist_presentation.pptx

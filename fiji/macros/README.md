@@ -1,4 +1,5 @@
 # ImageJ Macro
 
-Macro tự động sẽ được bổ sung ở phần thành viên 3. Không ghi đường dẫn tuyệt
-đối của một máy cá nhân vào macro được commit.
+`stardist_batch.ijm` là protocol batch an toàn: người chạy chèn dòng macro do
+Fiji Recorder tạo từ đúng phiên bản plugin của mình, rồi kiểm tra 2 ảnh trước
+khi chạy toàn bộ dữ liệu. Không ghi đường dẫn tuyệt đối máy cá nhân.

@@ -1,0 +1,5 @@
+method,n_test,ap_iou_050_mean,ap_iou_050_sd,ap_iou_075_mean,ap_iou_075_sd,ap_iou_090_mean,ap_iou_090_sd,pq_iou_050_mean,foreground_dice_mean,count_mae_mean,runtime_s_mean,hardware,notes
+Otsu,1,0.3571,NA,0.1808,NA,0.0245,NA,0.3972,0.8426,41,0.0222,CPU,"One-image DSB2018 demo; not a final benchmark"
+Watershed,1,0.5584,NA,0.2903,NA,0.0256,NA,0.5491,0.8426,10,0.0469,CPU,"One-image DSB2018 demo; min_distance=7"
+StarDist Fiji,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,"Requires actual Fiji run and exported label TIFF"
+StarDist Python,1,0.9440,NA,0.8000,NA,0.1683,NA,0.8273,0.9263,7,0.1552,CPU,"2D_versatile_fluo; pmin/pmax=1/99.8; prob/NMS=0.5/0.3"

@@ -1,0 +1,8 @@
+{
+  "dataset": "StarDist distributed DSB2018 fluorescence sample",
+  "source": "https://github.com/stardist/stardist",
+  "sample_count": 1,
+  "caveat": "Demonstration only. This single image is not an independent test set.",
+  "model": "2D_versatile_fluo",
+  "random_seed": 42
+}

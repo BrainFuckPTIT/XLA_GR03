@@ -1,0 +1,2 @@
+image,split,fiji_version,stardist_plugin_version,model,pmin,pmax,probability_threshold,overlap_threshold,n_tiles,device,runtime_s,label_path,roi_path,notes
+image_001,test,,,,,,,,,,,,,
