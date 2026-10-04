@@ -18,6 +18,13 @@ PRETRAINED_MODELS = {
 
 
 def _load_model(model_name: str, custom_model_dir: str | Path | None):
+    # Validate the lightweight configuration first.  This keeps invalid CLI
+    # arguments deterministic even in the base development environment, where
+    # the optional TensorFlow/StarDist dependency is intentionally absent.
+    if custom_model_dir is None and model_name not in PRETRAINED_MODELS:
+        supported = ", ".join(sorted(PRETRAINED_MODELS))
+        raise ValueError(f"Unknown pretrained model '{model_name}'. Choose one of: {supported}")
+
     try:
         from stardist.models import StarDist2D
     except ImportError as error:
@@ -26,9 +33,6 @@ def _load_model(model_name: str, custom_model_dir: str | Path | None):
         ) from error
 
     if custom_model_dir is None:
-        if model_name not in PRETRAINED_MODELS:
-            supported = ", ".join(sorted(PRETRAINED_MODELS))
-            raise ValueError(f"Unknown pretrained model '{model_name}'. Choose one of: {supported}")
         return StarDist2D.from_pretrained(model_name)
 
     model_path = Path(custom_model_dir).resolve()
