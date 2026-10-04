@@ -14,8 +14,8 @@ không thay thế output thực tế bằng số liệu giả định.
 | Minh chứng workflow Fiji/ImageJ | `results/fiji_reference/fiji_workflow_evidence.png` sinh từ TIFF input/label, ground truth, CSV metric và run log | Hoàn thành: input → normalize → label TIFF → overlay → metric/runtime |
 | Dataset tái lập | `data/dsb2018/dsb2018/` gồm 497 cặp TIFF (447 train, 50 test) | Hoàn thành: versioned; ZIP nguồn trùng lặp không commit |
 | Kiểm thử code | `tests/`, `pytest -q`, `ruff check src tests scripts`; Java runner được biên dịch và chạy ra TIFF thật | Hoàn thành: 23 tests passed; ruff và biên dịch Java runner đều pass |
-| Báo cáo khoảng 30 trang | `report/report.tex`, `report/report.pdf`, bảng/ảnh/code listing/reference | Hoàn thành nội dung; chỉ còn điền thông tin thành viên thật |
-| Slide khoảng 10 trang | `slides/stardist_presentation_submission_v6.pptx` (10 slide, chart editable, có panel Fiji thực tế) | Hoàn thành |
+| Báo cáo khoảng 30 trang | `report/report.tex`, `report/report.pdf`, bảng/ảnh/code listing/reference | Hoàn thành: 52 trang; bìa đã ghi tên và MSSV thành viên |
+| Slide khoảng 10 trang | `slides/stardist_presentation_submission_v7.pptx` (10 slide, chart editable, có panel Fiji thực tế) | Hoàn thành |
 
 ## Hai thao tác người nộp cần làm trước khi LMS submit
 

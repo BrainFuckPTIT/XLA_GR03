@@ -7,7 +7,7 @@ const workspaceDir = "D:/BTL_XLA";
 const SKILL_DIR = "C:/Users/nguye/.codex/plugins/cache/openai-primary-runtime/presentations/26.909.12148/skills/presentations";
 const RUNTIME_PYTHON = "C:/Users/nguye/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe";
 const buildDir = path.join(workspaceDir, ".slides-build");
-const finalPath = path.join(workspaceDir, "slides", "stardist_presentation_submission_v6.pptx");
+const finalPath = path.join(workspaceDir, "slides", "stardist_presentation_submission_v7.pptx");
 await fs.mkdir(buildDir, { recursive: true });
 await fs.mkdir(path.dirname(finalPath), { recursive: true });
 const { resolvePresentationFont, applyPresentationChartFont, finalizePresentation } = await import(pathToFileURL(path.join(SKILL_DIR, "container_tools/artifact_tool_utils.mjs")).href);
@@ -35,7 +35,7 @@ function footer(slide, note) { text(slide, note, 72, 676, 1136, 22, 12, gray); }
 function bullets(slide, items, x, y, w, size = 22, gap = 58) { items.forEach((item, i) => { text(slide, "•", x, y + i * gap, 18, 30, size, blue, true); text(slide, item, x + 28, y + i * gap, w - 28, 42, size, ink); }); }
 function step(slide, n, head, body, x, width) { box(slide, x, 255, width, 220, pale, "#CFE0F5"); text(slide, String(n), x + 24, 278, 38, 38, 23, blue, true); text(slide, head, x + 24, 330, width - 48, 34, 23, navy, true); text(slide, body, x + 24, 375, width - 48, 70, 17, gray); }
 
-{ const s = deck.slides.add(); s.background.fill = navy; text(s, "PHÂN ĐOẠN TỪNG ĐỐI TƯỢNG\nBẰNG STARDIST", 78, 154, 850, 150, 47, white, true); text(s, "Đối chiếu Fiji/ImageJ và cài đặt Python", 80, 330, 740, 38, 26, cyan); box(s, 80, 402, 160, 6, orange); text(s, "Bài tập lớn Xử lý ảnh số | Nhóm 03 | PTIT", 80, 450, 720, 30, 20, white); text(s, "Thành viên: điền tên và MSSV trước khi nộp", 80, 492, 720, 26, 16, "#D4E2F4"); s.speakerNotes.textFrame.setText("Nguồn: Schmidt et al. (2018); tài liệu repo."); }
+{ const s = deck.slides.add(); s.background.fill = navy; text(s, "PHÂN ĐOẠN TỪNG ĐỐI TƯỢNG\nBẰNG STARDIST", 78, 154, 850, 150, 47, white, true); text(s, "Đối chiếu Fiji/ImageJ và cài đặt Python", 80, 330, 740, 38, 26, cyan); box(s, 80, 402, 160, 6, orange); text(s, "Bài tập lớn Xử lý ảnh số | Nhóm 03 | PTIT", 80, 450, 720, 30, 20, white); text(s, "Nguyễn Hồng Quang — B23DCVT361\nNguyễn Trọng Nam Khánh — B23DCCE052\nVũ Dũng — B23DCVT110", 80, 490, 800, 66, 16, "#D4E2F4"); s.speakerNotes.textFrame.setText("Nguồn: Schmidt et al. (2018); tài liệu repo."); }
 { const s = deck.slides.add(); title(s, "Bài toán và mục tiêu", 2); text(s, "Instance segmentation", 72, 155, 470, 42, 28, navy, true); bullets(s, ["Không chỉ nhận diện foreground mà còn gán ID riêng cho từng tế bào.", "Cần thiết cho đếm tế bào, diện tích, hình dạng và phân tích sinh học.", "Khó nhất khi các nhân có biên mờ hoặc chạm nhau."], 72, 220, 530, 22); box(s, 690, 150, 450, 300, pale, "#CFE0F5"); text(s, "Mục tiêu", 730, 190, 300, 32, 26, blue, true); text(s, "1. Hiểu StarDist và plugin Fiji\n2. Cài đặt pipeline Python\n3. So sánh với Otsu và Watershed\n4. Đánh giá bằng metric instance", 730, 245, 350, 150, 21, ink); footer(s, "Ground truth là label image: nền = 0, mỗi instance có một ID dương."); }
 { const s = deck.slides.add(); title(s, "StarDist 2D", 3); text(s, "Mạng CNN/U-Net sinh hai trường dự đoán cho từng pixel", 72, 145, 900, 34, 23, gray); step(s, 1, "Probability map", "Score cao ở tâm object, thấp ở biên và nền.", 72, 250); step(s, 2, "Ray distances", "K khoảng cách đến biên theo các hướng cố định.", 360, 250); step(s, 3, "Polygon + NMS", "Giải mã proposal và giữ một polygon cho mỗi object.", 648, 250); step(s, 4, "Label image", "Rasterize polygon thành nhãn instance để đo metric.", 936, 250); footer(s, "StarDist paper dùng 32 tia trong các thí nghiệm 2D. Nguồn: Schmidt et al., 2018."); s.speakerNotes.textFrame.setText("Nguồn: Schmidt et al., Cell Detection with Star-convex Polygons, 2018."); }
 { const s = deck.slides.add(); title(s, "Biểu diễn star-convex", 4); text(s, "Một object star-convex cho phép nối từ tâm đến mọi điểm biên mà không đi ra ngoài object.", 72, 145, 1060, 38, 22, gray); box(s, 115, 250, 250, 250, "#DDEEFF", blue); text(s, "Tâm p", 205, 355, 80, 28, 22, navy, true, "center"); text(s, "Các tia r₀ … rₖ", 130, 520, 230, 28, 18, gray, false, "center"); text(s, "vₖ(p) = p + r̂ₖ(p)(cos θₖ, sin θₖ)", 450, 270, 620, 38, 28, navy, true); text(s, "Mỗi pixel foreground có một vector khoảng cách.\nNối các đầu tia tạo một đa giác đại diện cho instance.", 450, 340, 600, 85, 23, ink); text(s, "Giới hạn: hình vòng, nhiều nhánh hoặc lõm sâu có thể không phù hợp giả thiết.", 450, 460, 630, 52, 19, "#A34A00"); footer(s, "Chi tiết công thức và phân tích sai số: docs/01_ly_thuyet_stardist.md."); }
@@ -60,7 +60,7 @@ const result = await finalizePresentation({
   layoutArgs: ["--expected-slide-size-emu", "12192000,6858000", "--validate-bullet-geometry", "--validate-heading-fit"],
   fontPolicy: { basis: "design", families: [font] },
   verifyArtifactToolImport: true,
-  receiptPath: path.join(buildDir, "validation_submission_v6.json"),
+  receiptPath: path.join(buildDir, "validation_submission_v7.json"),
 });
 const montage = await deck.export({ format: "webp", montage: true, scale: 1 });
 await fs.writeFile(path.join(buildDir, "montage.webp"), new Uint8Array(await montage.arrayBuffer()));

@@ -141,7 +141,7 @@ ruff check .
 - [Trạng thái kiểm tra trước khi nộp](docs/05_trang_thai_nop_bai.md)
 - [Protocol Fiji/ImageJ](fiji/workflows/stardist_fiji_protocol.md)
 - [Báo cáo LaTeX](report/report.tex)
-- [Slide PowerPoint 10 trang](slides/stardist_presentation_submission_v6.pptx)
+- [Slide PowerPoint 10 trang](slides/stardist_presentation_submission_v7.pptx)
 
 ## Artefact nộp bài
 
@@ -153,7 +153,7 @@ ruff check .
   và biểu đồ benchmark.
 - `results/fiji_labels/` và `results/fiji_reference/`: TIFF label thật, metric,
   provenance và panel low/median/high từ plugin StarDist Fiji/ImageJ.
-- `slides/stardist_presentation_submission_v6.pptx`: deck 10 slide có thể
+- `slides/stardist_presentation_submission_v7.pptx`: deck 10 slide có thể
   chỉnh sửa, gồm benchmark 50 ảnh và evidence Fiji/ImageJ n=3 tách biệt.
 - `fiji/run_log_dsb2018_reference.csv`: log tham số/runtimes của lần chạy plugin.
 - `results/tables/final_metrics_template.csv`: bảng metric tổng hợp, nêu rõ

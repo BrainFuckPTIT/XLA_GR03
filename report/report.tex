@@ -5,7 +5,7 @@
 \setmainfont{Times New Roman}
 \usepackage{polyglossia}
 \setdefaultlanguage{vietnamese}
-\usepackage{amsmath,amssymb,booktabs,longtable,graphicx,hyperref,xcolor,listings,enumitem}
+\usepackage{amsmath,amssymb,booktabs,longtable,graphicx,hyperref,xcolor,listings,enumitem,array}
 \usepackage{setspace}
 \usepackage[numbers,sort&compress]{natbib}
 \hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
@@ -16,8 +16,12 @@
 \setlength{\intextsep}{8pt plus 2pt minus 2pt}
 \title{Phân đoạn từng đối tượng bằng Deep Learning với StarDist\\
 \large Đối chiếu Fiji/ImageJ và cài đặt Python}
-\author{Nhóm 03 -- Học viện Công nghệ Bưu chính Viễn thông\\
-Thành viên: \underline{\hspace{10cm}}}
+\author{Nhóm 03 -- Học viện Công nghệ Bưu chính Viễn thông\\[0.7em]
+\begin{tabular}{ll}
+Nguyễn Hồng Quang & B23DCVT361\\
+Nguyễn Trọng Nam Khánh & B23DCCE052\\
+Vũ Dũng & B23DCVT110
+\end{tabular}}
 \date{Hạn nộp: 19/11}
 \begin{document}
 \setstretch{1.25}
@@ -528,15 +532,14 @@ số tia, robustness với noise và đánh giá 3D.
 \bibliography{../references/references}
 \appendix
 \chapter{Phân công và checklist nộp bài}
-\begin{longtable}{p{3cm}p{10cm}}
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.7cm}>{\raggedright\arraybackslash}p{8.3cm}}
 \toprule Thành viên & Công việc và artefact\\\midrule\endfirsthead
-Thành viên 1 & Lý thuyết, mô hình toán, tài liệu: \texttt{docs/01\_ly\_thuyet\_stardist.md}.\\
-Thành viên 2 & Package Python, test, CLI và \texttt{scripts/run\_experiment.py}.\\
-Thành viên 3 & Fiji plugin, screenshot, macro, run log và label TIFF.\\
-Thành viên 4 & Dataset, split, ground truth, bảng/biểu đồ và phân tích.\\
+Nguyễn Hồng Quang\\B23DCVT361 & Lý thuyết, mô hình toán và tài liệu: \texttt{docs/01\_ly\_thuyet\_stardist.md}.\\
+Nguyễn Trọng Nam Khánh\\B23DCCE052 & Package Python, test, CLI và \texttt{scripts/run\_experiment.py}.\\
+Vũ Dũng\\B23DCVT110 & Fiji plugin, screenshot, macro, run log, label TIFF; chuẩn bị dataset, ground truth, bảng/biểu đồ và phân tích.\\
 \bottomrule
 \end{longtable}
-Trước khi nộp LMS: thay tên/mã nhóm, chốt dataset và license, chạy test/lint,
+Trước khi nộp LMS: kiểm tra tên/mã nhóm, chốt dataset và license, chạy test/lint,
 điền bảng số liệu thật, thêm 4--6 hình minh hoạ/biểu đồ từ test set, xuất PDF
 và kiểm tra số trang, cập nhật slide theo bảng cuối.
 
