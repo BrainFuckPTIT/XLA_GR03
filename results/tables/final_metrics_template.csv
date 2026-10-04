@@ -1,5 +1,5 @@
 method,n_test,ap_iou_050_mean,ap_iou_050_sd,ap_iou_075_mean,ap_iou_075_sd,ap_iou_090_mean,ap_iou_090_sd,pq_iou_050_mean,foreground_dice_mean,count_mae_mean,runtime_s_mean,hardware,notes
 Otsu,50,0.6428,0.2377,0.4534,0.2765,0.2228,0.2210,0.6266,0.8949,14.06,0.0100,CPU,"Official StarDist DSB2018 test split"
-Watershed,50,0.7150,0.1988,0.5011,0.2660,0.2143,0.2069,0.6771,0.8941,6.94,0.0226,CPU,"min_distance=9 selected on 30 train validation images"
-StarDist Fiji,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,"Requires actual Fiji run and exported label TIFF"
-StarDist Python,50,0.8527,0.1204,0.6918,0.2345,0.3046,0.3128,0.7846,0.9156,3.44,0.1085,CPU,"2D_versatile_fluo defaults: p=0.479071, NMS=0.3; no test tuning"
+Watershed,50,0.7150,0.1988,0.5011,0.2660,0.2143,0.2069,0.6771,0.8941,6.94,0.0238,CPU,"min_distance=9 selected on 30 train validation images"
+StarDist Fiji/ImageJ plugin,3,0.8010,0.2435,0.7637,0.2067,0.4061,0.3242,0.7883,0.9504,6.00,1.4199,CPU,"Actual ImageJ/Fiji StarDist artifact outputs on fixed low/median/high cases; not directly comparable to n=50 benchmark"
+StarDist Python,50,0.8527,0.1204,0.6918,0.2345,0.3046,0.3128,0.7846,0.9156,3.44,0.1120,CPU,"2D_versatile_fluo defaults: p=0.479071, NMS=0.3; no test tuning"

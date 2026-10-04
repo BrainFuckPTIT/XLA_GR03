@@ -45,8 +45,24 @@ node_modules/
 .slides-build/
 .chart-data-*/
 .external-stardist/
+.fiji/
+.fiji-download/
+.imagej/
+.imagej-download/
+tmp/
 .*.log
+fiji/scripts/*.class
 slides/stardist_presentation.pptx
 slides/stardist_presentation_submission.pptx
 slides/stardist_presentation_submission_v2.pptx
 slides/stardist_presentation_submission_v3.pptx
+slides/stardist_presentation_submission_v4.pptx
+slides/stardist_presentation_submission_v5.pptx
+
+# LaTeX auxiliary files (the submission PDF is versioned)
+report/*.aux
+report/*.bbl
+report/*.blg
+report/*.log
+report/*.out
+report/*.toc

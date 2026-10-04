@@ -59,10 +59,31 @@ Chỉ so sánh Fiji và Python nếu ảnh đầu vào, model, `pmin`, `pmax`, p
 threshold, NMS threshold, scale và quy tắc tile giống nhau. Khác biệt số nhãn
 phải được kiểm tra bằng overlay và log tham số trước khi kết luận.
 
+## Lần chạy tham chiếu đã lưu trong repository
+
+Ba output thực tế đã được tạo bằng artifact công khai
+`de.csbdresden:StarDist_:0.3.0-scijava` (command
+`de.csbdresden.stardist.StarDist2D`) trong ImageJ 2.9.0 headless + ImageJ 1.53t
+legacy, Eclipse Temurin 8.0.504 và TensorFlow 1.12 CPU. Java 8 được dùng vì
+loader TensorFlow ImageJ 1.12 không tương thích các runtime Java mới hơn.
+
+- Các ảnh `low`, `median`, `high` đã chọn trước theo
+  `results/dsb2018_benchmark/selected_cases.csv`.
+- Label TIFF thật: `results/fiji_labels/`.
+- Log model, ngưỡng, tile, runtime và runtime platform:
+  `fiji/run_log_dsb2018_reference.csv`.
+- Python đánh giá trực tiếp các TIFF: chạy
+  `python scripts/evaluate_fiji_reference.py`; kết quả là
+  `results/fiji_reference/per_image_metrics.csv`, `summary_metrics.csv` và
+  `fiji_reference_panels.png`.
+
+Đây là kiểm chứng cross-platform trên 3 ảnh, không phải ước lượng benchmark 50
+ảnh. Không gộp các dòng này với summary Python/baseline 50 ảnh.
+
 ## Checklist trước khi đưa vào báo cáo
 
-- [ ] Dataset, split, số ảnh và nguồn/giấy phép được nêu rõ.
-- [ ] Fiji, StarDist plugin, model, phần cứng và ngày chạy được ghi lại.
-- [ ] Label image 2D có kích thước đúng bằng ground truth.
-- [ ] Bảng có AP/accuracy theo IoU, PQ, Dice foreground, sai số đếm, runtime.
-- [ ] Ảnh minh hoạ có overlay GT/prediction và một lỗi merge hoặc split.
+- [x] Dataset, split, số ảnh và nguồn/giấy phép được nêu rõ.
+- [x] Fiji/ImageJ plugin artifact, model, runtime Java/TensorFlow và ngày chạy được ghi lại.
+- [x] Label image 2D có kích thước đúng bằng ground truth.
+- [x] Bảng có AP/accuracy theo IoU, PQ, Dice foreground, sai số đếm, runtime.
+- [x] Ảnh minh hoạ có overlay GT/prediction cho low/median/high.

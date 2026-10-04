@@ -157,7 +157,10 @@ def make_summary(rows: list[dict[str, object]]) -> list[dict[str, object]]:
 
 
 def make_figure(summary: list[dict[str, object]]) -> None:
-    subset = [row for row in summary if float(row["threshold"]) == 0.5]
+    rows_at_threshold = {
+        str(row["method"]): row for row in summary if float(row["threshold"]) == 0.5
+    }
+    subset = [rows_at_threshold[method] for method in ("Otsu", "Watershed", "StarDist Python")]
     labels = [str(row["method"]) for row in subset]
     ap = [float(row["accuracy_mean"]) for row in subset]
     pq = [float(row["panoptic_quality_mean"]) for row in subset]

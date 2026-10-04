@@ -98,6 +98,19 @@ xla-gr03 evaluate data/ground_truth/example.tif \
   results/stardist_labels.tif --thresholds 0.5 0.75 0.9
 ```
 
+### Đánh giá output StarDist Fiji/ImageJ
+
+Ba label TIFF thực tế của plugin trên các ca DSB2018 low/median/high đã có ở
+`results/fiji_labels/`. Tái tạo bảng metric và panel bằng:
+
+```powershell
+.venv\Scripts\python.exe scripts\evaluate_fiji_reference.py
+```
+
+Xem `fiji/scripts/run_stardist_headless.ps1` để chạy lại runner Java không GUI;
+`fiji/run_log_dsb2018_reference.csv` ghi chính xác artifact plugin, model,
+normalization, threshold, TensorFlow/Java runtime và thời gian từng ca.
+
 ## Kiểm thử
 
 ```bash
@@ -123,22 +136,23 @@ ruff check .
 - [Trạng thái kiểm tra trước khi nộp](docs/05_trang_thai_nop_bai.md)
 - [Protocol Fiji/ImageJ](fiji/workflows/stardist_fiji_protocol.md)
 - [Báo cáo LaTeX](report/report.tex)
-- [Slide PowerPoint 10 trang](slides/stardist_presentation_submission_v4.pptx)
+- [Slide PowerPoint 10 trang](slides/stardist_presentation_submission_v6.pptx)
 
 ## Artefact nộp bài
 
-- `report/report.tex`: báo cáo nguồn, gồm lý thuyết, Fiji, Python, protocol,
-  metric, bảng benchmark và ảnh định tính từ lần chạy thật. Hoàn tất thông tin
-  nhóm, output Fiji và xuất PDF trước khi nộp.
+- `report/report.pdf` và `report/report.tex`: báo cáo hoàn chỉnh gồm lý thuyết,
+  Python, Fiji/ImageJ, protocol, code, metric, benchmark và ảnh kết quả thật.
 - `scripts/run_dsb2018_benchmark.py`: benchmark 50 test images DSB2018, có
   validation tách biệt để chọn tham số Watershed.
 - `results/dsb2018_benchmark/`: CSV từng ảnh, bảng mean ± SD, validation sweep
   và biểu đồ benchmark.
-- `slides/stardist_presentation_submission_v4.pptx`: deck 10 slide có thể
-  chỉnh sửa, gồm biểu đồ benchmark đa ảnh và ảnh phân đoạn thật.
-- `fiji/run_log_template.csv`: bắt buộc điền cho lần chạy plugin.
-- `results/tables/final_metrics_template.csv`: bảng kết quả cuối; không điền
-  số liệu giả định.
+- `results/fiji_labels/` và `results/fiji_reference/`: TIFF label thật, metric,
+  provenance và panel low/median/high từ plugin StarDist Fiji/ImageJ.
+- `slides/stardist_presentation_submission_v6.pptx`: deck 10 slide có thể
+  chỉnh sửa, gồm benchmark 50 ảnh và evidence Fiji/ImageJ n=3 tách biệt.
+- `fiji/run_log_dsb2018_reference.csv`: log tham số/runtimes của lần chạy plugin.
+- `results/tables/final_metrics_template.csv`: bảng metric tổng hợp, nêu rõ
+  stratum Fiji n=3 không so sánh trực tiếp với n=50.
 - [Quy trình đóng góp](CONTRIBUTING.md)
 
 ## Nhóm thực hiện
