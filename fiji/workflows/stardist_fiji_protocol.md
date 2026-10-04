@@ -76,6 +76,11 @@ loader TensorFlow ImageJ 1.12 không tương thích các runtime Java mới hơn
   `python scripts/evaluate_fiji_reference.py`; kết quả là
   `results/fiji_reference/per_image_metrics.csv`, `summary_metrics.csv` và
   `fiji_reference_panels.png`.
+- Panel theo từng bước của ca median được dựng trực tiếp từ input TIFF, label
+  TIFF, ground truth, CSV metric và run log bằng
+  `python scripts/build_fiji_workflow_evidence.py`; output là
+  `results/fiji_reference/fiji_workflow_evidence.png`. Đây là visual audit
+  trail của lần chạy thực tế, không phải label được vẽ lại.
 
 Đây là kiểm chứng cross-platform trên 3 ảnh, không phải ước lượng benchmark 50
 ảnh. Không gộp các dòng này với summary Python/baseline 50 ảnh.

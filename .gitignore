@@ -29,7 +29,11 @@ Thumbs.db
 data/raw/**
 data/ground_truth/**
 data/processed/**
-data/dsb2018/
+# Version the extracted DSB2018 benchmark used by this assignment.  Keep the
+# downloaded archive ignored because it duplicates the tracked TIFF dataset.
+data/dsb2018/*
+!data/dsb2018/dsb2018/
+!data/dsb2018/dsb2018/**
 !data/raw/.gitkeep
 !data/ground_truth/.gitkeep
 !data/processed/.gitkeep

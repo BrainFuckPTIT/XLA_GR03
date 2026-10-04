@@ -22,8 +22,11 @@ data/
 └── processed/       ảnh trung gian đã chuẩn hóa/chuyển đổi
 ```
 
-Ba thư mục dữ liệu được giữ cục bộ và bị `.gitignore` loại khỏi Git. Không
-đưa dữ liệu có điều kiện cấp phép không rõ ràng vào repository công khai.
+Ba thư mục dự án riêng (`raw/`, `ground_truth/`, `processed/`) được giữ cục bộ
+và bị `.gitignore` loại khỏi Git. Ngoại lệ có chủ đích là
+`data/dsb2018/dsb2018/`: 497 cặp TIFF benchmark do StarDist phân phối được
+versioned để tái lập kết quả. Không đưa dữ liệu có điều kiện cấp phép không rõ
+ràng vào repository công khai.
 
 ## Quy ước
 

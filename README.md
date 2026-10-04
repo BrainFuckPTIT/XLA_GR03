@@ -25,7 +25,7 @@ marker-controlled Watershed là hai phương pháp đối chứng.
 XLA_GR03/
 ├── .github/                 CI và mẫu issue/pull request
 ├── configs/                 Cấu hình thí nghiệm có thể version-control
-├── data/                    Hướng dẫn dữ liệu; không commit dataset lớn
+├── data/                    DSB2018 benchmark TIFF đã versioned và hướng dẫn dữ liệu
 ├── docs/                    Lý thuyết, tài liệu và phân công
 ├── fiji/                    Workflow, macro/script Fiji
 ├── models/                  Hướng dẫn model; không commit weight lớn
@@ -105,11 +105,14 @@ Ba label TIFF thực tế của plugin trên các ca DSB2018 low/median/high đ�
 
 ```powershell
 .venv\Scripts\python.exe scripts\evaluate_fiji_reference.py
+.venv\Scripts\python.exe scripts\build_fiji_workflow_evidence.py
 ```
 
 Xem `fiji/scripts/run_stardist_headless.ps1` để chạy lại runner Java không GUI;
 `fiji/run_log_dsb2018_reference.csv` ghi chính xác artifact plugin, model,
 normalization, threshold, TensorFlow/Java runtime và thời gian từng ca.
+Lệnh thứ hai dựng lại panel input--normalization--Label Image--overlay--metric
+trong `results/fiji_reference/fiji_workflow_evidence.png` từ TIFF/log thực tế.
 
 ## Kiểm thử
 
@@ -124,8 +127,10 @@ ruff check .
 - Ground truth và prediction là ảnh nhãn integer.
 - Nền mang nhãn `0`; mỗi đối tượng mang một số nguyên dương duy nhất.
 - Tên cặp ảnh/nhãn nên giống nhau, ví dụ `image_001.tif`.
-- Không commit dataset, model weight, môi trường ảo hoặc toàn bộ output thô.
-  Xem [hướng dẫn dữ liệu](data/README.md).
+- DSB2018 đã giải nén (497 cặp TIFF, khoảng 194 MiB) được versioned để tái lập
+  benchmark; không commit model weight, môi trường ảo, dữ liệu có license không
+  rõ ràng hoặc output thô không dùng trong báo cáo. Xem
+  [hướng dẫn dữ liệu](data/README.md).
 
 ## Tài liệu
 
