@@ -531,17 +531,16 @@ số tia, robustness với noise và đánh giá 3D.
 \bibliographystyle{plainnat}
 \bibliography{../references/references}
 \appendix
-\chapter{Phân công và checklist nộp bài}
+\chapter{Phân công công việc}
+\noindent Cả ba thành viên cùng thực hiện phần lý thuyết, mô hình toán và tài liệu.
+
 \begin{longtable}{>{\raggedright\arraybackslash}p{4.7cm}>{\raggedright\arraybackslash}p{8.3cm}}
 \toprule Thành viên & Công việc và artefact\\\midrule\endfirsthead
-Nguyễn Hồng Quang\\B23DCVT361 & Lý thuyết, mô hình toán và tài liệu: \texttt{docs/01\_ly\_thuyet\_stardist.md}.\\
-Nguyễn Trọng Nam Khánh\\B23DCCE052 & Package Python, test, CLI và \texttt{scripts/run\_experiment.py}.\\
-Vũ Dũng\\B23DCVT110 & Fiji plugin, screenshot, macro, run log, label TIFF; chuẩn bị dataset, ground truth, bảng/biểu đồ và phân tích.\\
+Nguyễn Hồng Quang\\B23DCVT361 & Package Python, test, CLI và \texttt{scripts/run\_experiment.py}.\\
+Nguyễn Trọng Nam Khánh\\B23DCCE052 & Workflow Fiji/ImageJ: plugin StarDist, screenshot thao tác, macro, run log và label TIFF.\\
+Vũ Dũng\\B23DCVT110 & Tìm kiếm và chuẩn bị dataset, split, ground truth, bảng/biểu đồ và phân tích kết quả.\\
 \bottomrule
 \end{longtable}
-Trước khi nộp LMS: kiểm tra tên/mã nhóm, chốt dataset và license, chạy test/lint,
-điền bảng số liệu thật, thêm 4--6 hình minh hoạ/biểu đồ từ test set, xuất PDF
-và kiểm tra số trang, cập nhật slide theo bảng cuối.
 
 \chapter{Hướng dẫn tái lập đầy đủ}
 \section{Cài môi trường và kiểm thử}
@@ -562,8 +561,7 @@ có trong repository, còn script chỉ tải archive DSB2018 và model
 TIFF minh hoạ và figures. Lần chạy đã ghi trong báo cáo dùng CPU
 Windows; TensorFlow native Windows từ 2.11 không dùng CUDA, nên benchmark GPU
 phải ghi môi trường WSL2/Linux riêng. Phần ImageJ/Fiji tham chiếu đã lưu label
-TIFF, figure, metric và run log trên ba ca. Trước nộp chỉ cần điền tên/MSSV/mã
-nhóm rồi xuất PDF từ nguồn này.
+TIFF, figure, metric và run log trên ba ca.
 
 \chapter{Mã nguồn cốt lõi}
 \section{Matching và metric instance}
