@@ -14,18 +14,43 @@
 \setlength{\textfloatsep}{10pt plus 2pt minus 2pt}
 \setlength{\floatsep}{8pt plus 2pt minus 2pt}
 \setlength{\intextsep}{8pt plus 2pt minus 2pt}
-\title{Phân đoạn từng đối tượng bằng Deep Learning với StarDist\\
-\large Đối chiếu Fiji/ImageJ và cài đặt Python}
-\author{Nhóm 03 -- Học viện Công nghệ Bưu chính Viễn thông\\[0.7em]
-\begin{tabular}{ll}
-Nguyễn Hồng Quang & B23DCVT361\\
-Nguyễn Trọng Nam Khánh & B23DCCE052\\
-Vũ Dũng & B23DCVT110
-\end{tabular}}
-\date{Hạn nộp: 19/11}
+\definecolor{ptitred}{RGB}{182,32,40}
+\newcommand{\PTITCover}{%
+\begin{titlepage}
+  \thispagestyle{empty}
+  \centering
+  \vspace*{0.45cm}
+  \includegraphics[width=3.0cm]{assets/ptit-logo.jpg}\par
+  \vspace{0.25cm}
+  {\Large\bfseries\color{ptitred} HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH VIỄN THÔNG\par}
+  \vspace{0.1cm}
+  {\small\bfseries POSTS AND TELECOMMUNICATIONS INSTITUTE OF TECHNOLOGY\par}
+  \vspace{0.95cm}
+  {\Large\bfseries BÁO CÁO BÀI TẬP LỚN\par}
+  \vspace{0.2cm}
+  {\large\bfseries HỌC PHẦN: XỬ LÝ ẢNH SỐ\par}
+  \vspace{0.85cm}
+  \rule{\textwidth}{0.8pt}\par
+  \vspace{0.4cm}
+  {\Large\bfseries PHÂN ĐOẠN TỪNG ĐỐI TƯỢNG\\
+  BẰNG DEEP LEARNING VỚI STARDIST\par}
+  \vspace{0.25cm}
+  {\large\itshape Đối chiếu Fiji/ImageJ và cài đặt Python\par}
+  \vspace{0.4cm}
+  \rule{\textwidth}{0.8pt}\par
+  \vspace{0.9cm}
+  \begin{tabular}{@{}ll@{}}
+    \textbf{Mã nhóm:} & \textbf{GR03}\\[0.45em]
+    \textbf{Thành viên:} & Nguyễn Hồng Quang -- B23DCVT361\\
+                          & Nguyễn Trọng Nam Khánh -- B23DCCE052\\
+                          & Vũ Dũng -- B23DCVT110
+  \end{tabular}
+  \vfill
+  {\large\bfseries HÀ NỘI\par}
+\end{titlepage}}
 \begin{document}
 \setstretch{1.25}
-\maketitle
+\PTITCover
 \pagenumbering{roman}
 \chapter*{Tóm tắt}
 Phân đoạn từng đối tượng (instance segmentation) là bước nền tảng để đếm và đo
@@ -38,10 +63,24 @@ nền tảng tham chiếu. Otsu và marker-controlled Watershed là hai baseline
 quả cuối được đánh giá bằng matching một-một theo IoU, AP tại nhiều ngưỡng,
 Panoptic Quality, Dice foreground, sai số đếm và thời gian xử lý. Các label TIFF
 Fiji/ImageJ, log tham số và metric của ba ca kiểm chứng được lưu cùng mã nguồn.
+\addcontentsline{toc}{chapter}{Tóm tắt}
 
-\chapter*{Từ khóa} StarDist, instance segmentation, U-Net, star-convex, Fiji,
-ImageJ, Otsu, Watershed, Panoptic Quality.
+Trên 50 ảnh test DSB2018, StarDist Python đạt AP@0.50 $0.853\pm0.120$ và
+PQ@0.50 $0.785\pm0.110$, cao hơn hai baseline cổ điển trong protocol đã công
+bố. Ba ca low/median/high chạy thật trên Fiji/ImageJ được giữ riêng để đối
+chiếu liên nền tảng, tránh diễn giải nhầm chúng như benchmark $n=50$.
+
+\medskip
+\noindent\textbf{Từ khóa:} StarDist, instance segmentation, U-Net, star-convex,
+Fiji, ImageJ, Otsu, Watershed, Panoptic Quality.
+\clearpage
 \tableofcontents
+\clearpage
+\addcontentsline{toc}{chapter}{Danh mục hình vẽ}
+\listoffigures
+\clearpage
+\addcontentsline{toc}{chapter}{Danh mục bảng}
+\listoftables
 \clearpage\pagenumbering{arabic}
 
 \chapter{Giới thiệu}
@@ -217,7 +256,8 @@ $t_{\mathrm{nms}}=0.3$, được lấy từ cấu hình model, không tune trên
 \subsection{Otsu và connected components}
 Otsu giả định histogram có thể tách thành hai lớp bằng ngưỡng $t$. Gọi
 $\omega_0,\omega_1$ là xác suất hai lớp và $\mu_0,\mu_1$ là trung bình cường
-độ của chúng, Otsu chọn
+độ của chúng, Otsu chọn ngưỡng toàn cục bằng cách cực đại hoá phương sai giữa
+lớp \citep{otsu1979threshold}:
 \begin{equation}
  t^*=\arg\max_t\;\sigma_B^2(t),\qquad
  \sigma_B^2(t)=\omega_0(t)\omega_1(t)[\mu_0(t)-\mu_1(t)]^2.
@@ -244,8 +284,8 @@ $d$ phải chọn trên validation thay vì test.
 Otsu và Watershed là phương pháp bottom-up dựa trên cường độ/địa hình; StarDist
 là phương pháp learned proposal có prior star-convex. Baseline không cạnh tranh
 công bằng về lượng thông tin học được, nhưng cần thiết để xác định mức cải thiện
-thực sự so với xử lý ảnh cổ điển. Cả ba xuất cùng chuẩn label TIFF và đi qua
-cùng metric, do đó so sánh không bị ảnh hưởng bởi cách hiển thị màu.
+thực sự so với xử lý ảnh cổ điển. Các output đều được chuẩn hoá thành label TIFF
+trước khi dùng chung metric.
 
 \chapter{Fiji/ImageJ làm nền tảng tham chiếu}
 \section{Plugin StarDist}
@@ -399,7 +439,7 @@ phải area under precision--recall curve. $\tau=0.50$ trả lời ``có nhận 
 object không'', còn $\tau=0.90$ đòi biên khớp rất chính xác. Bởi vậy, chỉ báo
 cáo một ngưỡng có thể che mất lỗi hình dạng.
 
-Panoptic Quality kết hợp nhận diện và chất lượng mask:
+Panoptic Quality kết hợp nhận diện và chất lượng mask \citep{kirillov2019panoptic}:
 \begin{equation}
  PQ_\tau=\frac{\sum_{(i,j)\in\mathrm{TP}}J_{ij}}
  {TP+\tfrac12FP+\tfrac12FN}.
@@ -516,10 +556,15 @@ Dice $0.950\pm0.017$; các TIFF/metric làm bằng chứng tương thích, khôn
 thế benchmark $n=50$.
 
 \section{Đe doạ tới tính hợp lệ}
-Model pretrained có thể không phù hợp stain/optics của dữ liệu. Khác biệt Fiji
-và Python có thể do version, normalization, tile hoặc NMS, không nhất thiết do
-thuật toán. Dataset nhỏ dẫn tới SD lớn. Instance có hình không star-convex là
-giới hạn cấu trúc; fine-tuning hoặc phương pháp khác cần được cân nhắc.
+Các kết luận được giới hạn bởi bốn yếu tố. (i) Model pretrained có thể không
+phù hợp stain hoặc optics của dữ liệu mới; chưa có fine-tuning trên DSB2018.
+(ii) Kết quả Fiji chỉ có ba ca cố định, vì vậy là kiểm chứng tương thích chứ
+không phải ước lượng hiệu năng cùng cỡ mẫu $n=50$ của Python. (iii) Khác biệt
+Fiji--Python có thể do version, normalization, tile hoặc NMS, không nhất thiết
+do thuật toán; do đó nhóm lưu output label, log và tham số của từng ca. (iv)
+Runtime giữa hai nền tảng không hoàn toàn đồng nhất vì Fiji bao gồm chi phí khởi
+tạo plugin và môi trường thực thi. Cuối cùng, instance có hình không star-convex
+là giới hạn cấu trúc; fine-tuning hoặc phương pháp khác cần được cân nhắc.
 
 \chapter{Kết luận và hướng phát triển}
 StarDist biến dự đoán pixel dày đặc thành tập polygon có định danh instance,
@@ -538,7 +583,7 @@ số tia, robustness với noise và đánh giá 3D.
 \toprule Thành viên & Công việc và artefact\\\midrule\endfirsthead
 Nguyễn Hồng Quang\\B23DCVT361 & Package Python, test, CLI và \texttt{scripts/run\_experiment.py}.\\
 Nguyễn Trọng Nam Khánh\\B23DCCE052 & Workflow Fiji/ImageJ: plugin StarDist, screenshot thao tác, macro, run log và label TIFF.\\
-Vũ Dũng\\B23DCVT110 & Tìm kiếm và chuẩn bị dataset, split, ground truth, bảng/biểu đồ và phân tích kết quả.\\
+Vũ Dũng\\B23DCVT110 & Tìm kiếm, thu thập và chuẩn bị dataset; tổ chức split và ground truth.\\
 \bottomrule
 \end{longtable}
 
