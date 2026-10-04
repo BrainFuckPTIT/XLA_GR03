@@ -34,7 +34,7 @@ XLA_GR03/
 ├── report/                  Báo cáo cuối kỳ
 ├── results/                 Bảng/biểu đồ kết quả được chọn lọc
 ├── scripts/                 Entry point chạy từ command line
-├── slides/                  Presentation khoảng 10 slide
+├── slides/                  PowerPoint nguồn và liên kết Canva presentation
 ├── src/xla_gr03/            Mã nguồn Python chính
 └── tests/                   Unit test
 ```
@@ -141,7 +141,8 @@ ruff check .
 - [Trạng thái kiểm tra trước khi nộp](docs/05_trang_thai_nop_bai.md)
 - [Protocol Fiji/ImageJ](fiji/workflows/stardist_fiji_protocol.md)
 - [Báo cáo LaTeX](report/report.tex)
-- [Slide PowerPoint 10 trang](slides/stardist_presentation_submission_v7.pptx)
+- [Slide PowerPoint 25 trang](slides/stardist_presentation_submission_v8.pptx)
+- [Canva Presentation 23 slide — bản chỉnh sửa](https://www.canva.com/d/dXSeOCrNIgRyJam)
 
 ## Artefact nộp bài
 
@@ -153,8 +154,11 @@ ruff check .
   và biểu đồ benchmark.
 - `results/fiji_labels/` và `results/fiji_reference/`: TIFF label thật, metric,
   provenance và panel low/median/high từ plugin StarDist Fiji/ImageJ.
-- `slides/stardist_presentation_submission_v7.pptx`: deck 10 slide có thể
-  chỉnh sửa, gồm benchmark 50 ảnh và evidence Fiji/ImageJ n=3 tách biệt.
+- `slides/stardist_presentation_submission_v8.pptx`: deck 25 slide có thể
+  chỉnh sửa, trình bày lý thuyết, Python, thao tác Fiji/ImageJ, benchmark 50 ảnh
+  và evidence Fiji/ImageJ n=3 tách biệt.
+- Canva Presentation (23 slide): bản theo template Canva, đã chèn chuỗi ảnh
+  chứng minh Fiji/ImageJ, ảnh định tính và biểu đồ benchmark thực nghiệm.
 - `fiji/run_log_dsb2018_reference.csv`: log tham số/runtimes của lần chạy plugin.
 - `results/tables/final_metrics_template.csv`: bảng metric tổng hợp, nêu rõ
   stratum Fiji n=3 không so sánh trực tiếp với n=50.

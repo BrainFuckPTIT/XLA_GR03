@@ -15,13 +15,7 @@ không thay thế output thực tế bằng số liệu giả định.
 | Dataset tái lập | `data/dsb2018/dsb2018/` gồm 497 cặp TIFF (447 train, 50 test) | Hoàn thành: versioned; ZIP nguồn trùng lặp không commit |
 | Kiểm thử code | `tests/`, `pytest -q`, `ruff check src tests scripts`; Java runner được biên dịch và chạy ra TIFF thật | Hoàn thành: 23 tests passed; ruff và biên dịch Java runner đều pass |
 | Báo cáo khoảng 30 trang | `report/report.tex`, `report/report.pdf`, bảng/ảnh/code listing/reference | Hoàn thành: 52 trang; bìa đã ghi tên và MSSV thành viên |
-| Slide khoảng 10 trang | `slides/stardist_presentation_submission_v7.pptx` (10 slide, chart editable, có panel Fiji thực tế) | Hoàn thành |
-
-## Hai thao tác người nộp cần làm trước khi LMS submit
-
-1. Điền **tên, MSSV và mã nhóm** trên bìa report/slide.
-2. Mở PDF/PPTX cuối, kiểm tra tên/mã nhóm và submit link lên LMS theo yêu cầu
-   lớp. Các kết quả Fiji/ImageJ đã có TIFF, panel, metric, runtime và run log.
+| Slide trình bày đầy đủ | `slides/stardist_presentation_submission_v8.pptx` (25 slide) và [Canva Presentation 23 slide](https://www.canva.com/d/dXSeOCrNIgRyJam) | Hoàn thành: có lý thuyết, Python, Fiji/ImageJ, ảnh workflow/label/overlay thực tế, benchmark n=50 và Fiji reference n=3 tách biệt |
 
 Kết quả Fiji/ImageJ là 3 ca low/median/high được chọn trước từ test split; không
 được coi là benchmark 50 ảnh hay dùng để xếp hạng trực tiếp với các dòng 50 ảnh.
