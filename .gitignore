@@ -56,6 +56,9 @@ node_modules/
 tmp/
 .*.log
 fiji/scripts/*.class
+fiji/target/
+results/fiji_rerun/*.log
+.codex-finalizer/
 slides/stardist_presentation.pptx
 slides/stardist_presentation_submission.pptx
 slides/stardist_presentation_submission_v2.pptx

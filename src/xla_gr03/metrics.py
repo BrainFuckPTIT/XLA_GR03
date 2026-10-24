@@ -88,6 +88,28 @@ def _safe_ratio(numerator: float, denominator: float) -> float:
     return float(numerator / denominator) if denominator else 0.0
 
 
+def matched_label_pairs(
+    ground_truth: ArrayLike,
+    prediction: ArrayLike,
+    threshold: float = 0.5,
+) -> list[tuple[int, int, float]]:
+    """Return original label IDs and IoUs of the accepted one-to-one assignment."""
+    if not 0 < threshold <= 1:
+        raise ValueError("threshold must be in (0, 1].")
+    true, pred = _validate_label_pair(ground_truth, prediction)
+    iou = intersection_over_union_matrix(true, pred)
+    if not min(iou.shape):
+        return []
+    cost = -(iou >= threshold).astype(float) - iou / (2 * min(iou.shape))
+    ii, jj = linear_sum_assignment(cost)
+    true_ids, pred_ids = np.unique(true[true > 0]), np.unique(pred[pred > 0])
+    return [
+        (int(true_ids[i]), int(pred_ids[j]), float(iou[i, j]))
+        for i, j in zip(ii, jj, strict=True)
+        if iou[i, j] >= threshold
+    ]
+
+
 def evaluate_instances(
     ground_truth: ArrayLike,
     prediction: ArrayLike,
@@ -99,19 +121,11 @@ def evaluate_instances(
     uses IoU as a tie-breaker, following the StarDist matching implementation.
     """
 
-    if not 0 <= threshold <= 1:
-        raise ValueError("threshold must be in [0, 1].")
+    if not 0 < threshold <= 1:
+        raise ValueError("threshold must be in (0, 1].")
     true, pred = _validate_label_pair(ground_truth, prediction)
-    iou = intersection_over_union_matrix(true, pred)
-    n_true, n_pred = iou.shape
-    matched_ious = np.array([], dtype=np.float64)
-
-    if n_true and n_pred:
-        n_possible = min(n_true, n_pred)
-        cost = -(iou >= threshold).astype(np.float64) - iou / (2.0 * n_possible)
-        true_indices, pred_indices = linear_sum_assignment(cost)
-        assigned_ious = iou[true_indices, pred_indices]
-        matched_ious = assigned_ious[assigned_ious >= threshold]
+    n_true, n_pred = len(np.unique(true[true > 0])), len(np.unique(pred[pred > 0]))
+    matched_ious = np.asarray([v for _, _, v in matched_label_pairs(true, pred, threshold)])
 
     true_positives = int(matched_ious.size)
     false_positives = n_pred - true_positives
@@ -119,9 +133,7 @@ def evaluate_instances(
     precision = _safe_ratio(true_positives, true_positives + false_positives)
     recall = _safe_ratio(true_positives, true_positives + false_negatives)
     f1 = _safe_ratio(2 * true_positives, 2 * true_positives + false_positives + false_negatives)
-    accuracy = _safe_ratio(
-        true_positives, true_positives + false_positives + false_negatives
-    )
+    accuracy = _safe_ratio(true_positives, true_positives + false_positives + false_negatives)
     mean_matched_iou = float(matched_ious.mean()) if true_positives else 0.0
     pq_denominator = true_positives + 0.5 * false_positives + 0.5 * false_negatives
     panoptic_quality = _safe_ratio(float(matched_ious.sum()), pq_denominator)

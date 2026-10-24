@@ -2,13 +2,18 @@
 \documentclass[12pt,a4paper]{report}
 \usepackage[a4paper,margin=2.5cm]{geometry}
 \usepackage{fontspec}
-\setmainfont{Times New Roman}
+\setmainfont{texgyretermes-regular.otf}[
+  BoldFont=texgyretermes-bold.otf,
+  ItalicFont=texgyretermes-italic.otf,
+  BoldItalicFont=texgyretermes-bolditalic.otf]
 \usepackage{polyglossia}
 \setdefaultlanguage{vietnamese}
 \usepackage{amsmath,amssymb,booktabs,longtable,graphicx,hyperref,xcolor,listings,enumitem,array}
+\usepackage{xurl}
 \usepackage{setspace}
+\setlength{\emergencystretch}{2em}
 \usepackage[numbers,sort&compress]{natbib}
-\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue,hypertexnames=false}
 \lstset{basicstyle=\ttfamily\small,breaklines=true,frame=single}
 \setlist{nosep,leftmargin=1.6em}
 \setlength{\textfloatsep}{10pt plus 2pt minus 2pt}
@@ -48,6 +53,7 @@
   \vfill
   {\large\bfseries HÀ NỘI\par}
 \end{titlepage}}
+\input{generated/metrics.tex}
 \begin{document}
 \setstretch{1.25}
 \PTITCover
@@ -65,8 +71,8 @@ Panoptic Quality, Dice foreground, sai số đếm và thời gian xử lý. Cá
 Fiji/ImageJ, log tham số và metric của ba ca kiểm chứng được lưu cùng mã nguồn.
 \addcontentsline{toc}{chapter}{Tóm tắt}
 
-Trên 50 ảnh test DSB2018, StarDist Python đạt AP@0.50 $0.853\pm0.120$ và
-PQ@0.50 $0.785\pm0.110$, cao hơn hai baseline cổ điển trong protocol đã công
+Trên 50 ảnh test DSB2018, StarDist Python đạt AP@0.50 \StarAP{} và
+PQ@0.50 \StarPQ{}, cao hơn hai baseline cổ điển trong protocol đã công
 bố. Ba ca low/median/high chạy thật trên Fiji/ImageJ được giữ riêng để đối
 chiếu liên nền tảng, tránh diễn giải nhầm chúng như benchmark $n=50$.
 
@@ -139,13 +145,13 @@ nhiều ngưỡng IoU.
 Các model pretrained nhạy với thang cường độ. Với percentile thấp/cao $a,b$,
 chuẩn hoá dùng trong thí nghiệm là
 \begin{equation}
- I_{\mathrm{norm}}(q)=\operatorname{clip}\left(
- \frac{I(q)-Q_a(I)}{Q_b(I)-Q_a(I)+\varepsilon},0,1\right),
+ I_{\mathrm{norm}}(q)=
+ \frac{I(q)-Q_a(I)}{Q_b(I)-Q_a(I)+\varepsilon},
  \label{eq:percentile-normalization}
 \end{equation}
 trong đó $Q_a,Q_b$ là percentile và $\varepsilon$ tránh chia cho 0. Nó không
-thay đổi toạ độ hay pixel size, nhưng giới hạn ảnh hưởng của outlier sáng/tối.
-Trong cả Fiji và Python, cùng $a=1$, $b=99.8$ được giữ cố định. Label output
+thay đổi toạ độ hay pixel size. Python dùng percentile tuyến tính NumPy, không cắt giá trị ngoài $[0,1]$.
+Fiji cũng dùng $a=1$, $b=99.8$ và không cắt ngưỡng trên, nhưng CSBDeep Java dùng histogram percentile và chặn ngưỡng dưới ở 0. Vì vậy hai tiền xử lý gần nhau, không được coi là giống hệt nhau. Label output
 luôn là TIFF 2D số nguyên, không phải ảnh RGB màu; màu chỉ dùng để hiển thị ID.
 
 \section{CNN và U-Net}
@@ -237,11 +243,11 @@ Tại inference, tạo candidate $C=\{q:\hat p(q)\ge t_p\}$. Mỗi $q\in C$ đư
 decode theo~\eqref{eq:polygon-vertices}; sau đó sắp giảm dần theo $\hat p(q)$.
 Với proposal được giữ $A$ và proposal xét $B$, overlap là
 \begin{equation}
- \operatorname{IoU}(A,B)=\frac{|A\cap B|}{|A\cup B|}.
+ \operatorname{overlap}(A,B)=\frac{|A\cap B|}{\min(|A|,|B|)}.
  \label{eq:polygon-iou}
 \end{equation}
 NMS giữ proposal score cao nhất còn lại và loại mọi proposal có
-$\operatorname{IoU}(A,B)>t_{\mathrm{nms}}$; lặp đến khi hết candidate. Các
+$\operatorname{overlap}(A,B)>t_{\mathrm{nms}}$; lặp đến khi hết candidate. Độ đo này của StarDist 2D khác IoU dùng để đánh giá, vốn chuẩn hoá bằng hợp. Các
 polygon được giữ được raster hoá thành label ID không chồng nhau. Độ phức tạp
 CNN gần tuyến tính theo số pixel, còn hậu xử lý phụ thuộc số candidate và cặp
 polygon; vì vậy $t_p$, tile size và NMS ảnh hưởng runtime.
@@ -311,7 +317,7 @@ Tham số & Giá trị lần chạy tham chiếu & Ý nghĩa/điểm cần kiể
 \midrule\endfirsthead
 \toprule Tham số & Giá trị lần chạy tham chiếu & Ý nghĩa/điểm cần kiểm tra\\\midrule\endhead
 Model & Versatile (fluorescent nuclei) & Phải phù hợp modality; không dùng model H\&E cho ảnh huỳnh quang.\\
-Normalize & percentile 1 / 99.8 & Cùng công thức~\eqref{eq:percentile-normalization} ở Fiji và Python.\\
+Normalize & percentile 1 / 99.8 & Cùng percentile đặt trước, nhưng khác thuật toán percentile và xử lý ngưỡng dưới.\\
 Probability threshold & 0.479071 & Lọc candidate trước NMS; không tối ưu lại trên ba ảnh kiểm chứng.\\
 NMS overlap & 0.3 & Khử proposal polygon trùng; khác với IoU threshold khi đánh giá.\\
 Tiles / exclude boundary & 1 / 2 px & Tile ảnh hưởng bộ nhớ và seam; boundary exclusion thay đổi object nằm sát biên.\\
@@ -321,7 +327,7 @@ Output & Label Image TIFF & Phải cùng kích thước với input/ground truth
 
 \section{Protocol tái lập và lần chạy thực tế}
 Ngoài protocol GUI, nhóm chạy command StarDist đã công bố
-\texttt{de.csbdresden:StarDist\_:0.3.0-scijava} trong ImageJ 2.9.0 headless,
+\path{de.csbdresden:StarDist_:0.3.0-scijava} trong ImageJ 2.9.0 headless,
 với ImageJ 1.53t legacy, Eclipse Temurin 8.0.504 và TensorFlow 1.12 CPU. Đây là
 chính artifact plugin dùng cho Fiji/ImageJ; Java~8 cần thiết vì TensorFlow
 ImageJ 1.12 là runtime cũ. Ba ảnh low/median/high được chọn trước từ test split
@@ -329,12 +335,21 @@ theo AP của StarDist Python, không tune threshold trên ba ảnh này. Model 
 \emph{Versatile (fluorescent nuclei)}, percentile $1/99.8$, probability
 $0.479071$, overlap/NMS $0.3$, một tile và boundary exclusion~2. Plugin xuất
 Label Image TIFF cùng kích thước input. Mỗi lần chạy và runtime được ghi trong
-\texttt{fiji/run\_log\_dsb2018\_reference.csv}; runner Java là
-\texttt{fiji/scripts/FijiStarDistRunner.java}.
+\path{fiji/run_log_dsb2018_reference.csv}; runner Java là
+\path{fiji/scripts/FijiStarDistRunner.java}.
 
-File \texttt{fiji/workflows/stardist\_fiji\_protocol.md} vẫn là hướng dẫn thao tác
-Fiji GUI; macro \texttt{fiji/macros/stardist\_batch.ijm} yêu cầu dùng Fiji Recorder
+File \path{fiji/workflows/stardist_fiji_protocol.md} vẫn là hướng dẫn thao tác
+Fiji GUI; macro \path{fiji/macros/stardist_batch.ijm} yêu cầu dùng Fiji Recorder
 để chèn đúng lệnh của phiên bản plugin, tránh đoán option macro.
+
+Đợt tái tạo ngày 24/10/2026 bổ sung \path{fiji/pom.xml} và
+\path{scripts/run_fiji_reference.py}: Maven 3.9.9 dựng classpath trên máy
+macOS Intel với Java 8u504, runner xuất lại ba TIFF và log mới. Các file native
+JNI và framework TensorFlow 1.12 được trích từ JAR vào cùng thư mục để nạp đủ
+thư viện trên macOS. \path{results/fiji_rerun/reproduction_check.csv} xác nhận
+ba mảng label trùng hoàn toàn từng pixel với nhãn tham chiếu lịch sử.
+Manifest JAR/SHA256 và metric chạy lại lưu trong \path{results/fiji_rerun/}.
+Runtime mới giữ riêng, không thay số runtime lịch sử trên phần cứng khác.
 
 \subsection{Các bước thao tác và bằng chứng cần lưu}
 Quy trình GUI được áp dụng theo đúng thứ tự sau. Mỗi bước có artefact tương ứng
@@ -342,7 +357,7 @@ trong repository để người chấm kiểm tra thay vì chỉ tin vào mô t�
 \begin{enumerate}
 \item Mở TIFF 2D và xác nhận kích thước/bit-depth/channel bằng
 \texttt{Image > Show Info}. Lưu tên file input và không resize ảnh.
-\item Mở \texttt{Plugins > StarDist > StarDist 2D}; chọn đúng model, nhập
+\item Trong menu \texttt{Plugins > StarDist}, chọn \texttt{StarDist 2D}. Chọn model, nhập
 percentile, probability, NMS, tile và bật \texttt{Label Image}.
 \item Chạy inference; sau khi output xuất hiện, kiểm tra input và label cùng
 chiều cao/rộng, quan sát overlay/ROI để phát hiện merge hoặc split bất thường.
@@ -353,9 +368,9 @@ metric trước khi tổng hợp mean $\pm$ SD.
 \end{enumerate}
 
 Hình~\ref{fig:fiji-workflow} là bằng chứng trực quan của năm đầu ra từ workflow
-thật ở ca median: TIFF input, input sau percentile normalization, label image,
+thật ở ca median: TIFF input, input tăng tương phản để minh hoạ, label image,
 overlay biên đối chiếu ground truth và block tham số/runtime trích từ run log.
-Nó được dựng từ file đầu vào/đầu ra thực tế, không suy diễn label từ ảnh chụp.
+Panel được dựng từ file đầu vào/đầu ra thực tế. Ảnh tăng tương phản chỉ phục vụ hiển thị, không phải tensor chuẩn hoá lấy trực tiếp từ plugin.
 Các output ba ca low/median/high đầy đủ tiếp tục được trình bày ở
 Hình~\ref{fig:fiji-reference}.
 
@@ -363,31 +378,29 @@ Hình~\ref{fig:fiji-reference}.
 \centering
 \includegraphics[width=\textwidth]{../results/fiji_reference/fiji_workflow_evidence.png}
 \caption{Minh chứng từng bước của workflow Fiji/ImageJ trên ca median. Từ trái
-sang phải: input TIFF, ảnh sau percentile 1/99.8, Label Image TIFF StarDist,
+sang phải: input TIFF, ảnh hiển thị percentile 1/99.8 (minh hoạ), Label Image TIFF StarDist,
 overlay prediction/ground truth và parameter/runtime thực tế. Đây là artefact
 đầu ra của plugin/evaluator, không phải mask minh hoạ tự vẽ.}
 \label{fig:fiji-workflow}
 \end{figure}
 
 \section{Kiểm chứng Fiji--Python}
-Hai output chỉ được so sánh khi dùng cùng ảnh, model, scale, chuẩn hoá và hai
-threshold. Python đọc trực tiếp label TIFF Fiji rồi ghép instance theo IoU.
-Nếu số object khác nhau, kiểm tra overlay và run log trước, sau đó mới kết luận
-do phiên bản/model hay hậu xử lý. Bảng dữ liệu cấp-ảnh nằm tại
-\texttt{results/fiji\_reference/per\_image\_metrics.csv}; nó ghi cả TP, FP, FN,
-Dice, PQ, sai số đếm, thời gian và ba threshold đánh giá. Do đó Fiji không chỉ
-được quan sát bằng mắt mà được đặt vào cùng evaluator instance với Python.
+Đánh giá Fiji với ground truth đo chất lượng phân đoạn; so sánh Fiji với
+Python đo độ tương ứng hai triển khai. Hai phép đo được lưu riêng trong
+\path{results/fiji_reference/} và \path{results/cross_platform/}.
+Không coi điểm AP tương tự với ground truth là bằng chứng hai output giống nhau.
+Kết quả đối chiếu trực tiếp và khác biệt tiền xử lý được thảo luận ở Chương 6.
 
 \chapter{Cài đặt Python}
 \section{Kiến trúc phần mềm}
-Package \texttt{src/xla\_gr03} tách tiền xử lý, I/O TIFF, Otsu/Watershed, geometry,
+Package \path{src/xla_gr03} tách tiền xử lý, I/O TIFF, Otsu/Watershed, geometry,
 StarDist wrapper, metrics và CLI. Mọi output là label integer 2D. Lệnh
 `xla-gr03 segment` chạy một phương pháp; `xla-gr03 evaluate` xuất JSON metric.
 Unit tests bao phủ geometry, metric, preprocessing, I/O và baseline.
 
 \section{Phần nhóm tự cài đặt và phần tái sử dụng}
 Nhóm tự cài đặt EDT chuẩn hoá theo instance, ray distance, polygon decode,
-polygon NMS raster hoá, IoU matrix và Hungarian matching. CNN/model pretrained
+polygon NMS raster hoá, IoU matrix và hàm đánh giá instance dùng bộ giải Hungarian của SciPy. Các hàm geometry là bản tham chiếu giáo dục, chưa thay hậu xử lý chính thức trong inference. CNN/model pretrained
 được gọi từ thư viện StarDist chính thức \citep{stardist_repository}. Sự phân
 biệt này tránh tuyên bố sai rằng nhóm tự train lại toàn bộ mạng.
 
@@ -404,14 +417,14 @@ pytest và ruff; extra `stardist` thêm TensorFlow, csbdeep và StarDist. Chạy
 `conda env create -f environment.yml`, sau đó `pytest` và `ruff check .`.
 Model weight và dữ liệu nội bộ/raw không được commit; ngoại lệ là bộ benchmark
 DSB2018 đã giải nén (497 cặp TIFF, xấp xỉ 194 MiB) được versioned tại
-\texttt{data/dsb2018/dsb2018/} để tái lập đúng kết quả báo cáo. Config mặc định
-ở \texttt{configs/default.yaml}.
+\path{data/dsb2018/dsb2018/} để tái lập đúng kết quả báo cáo. Tham số mặc định
+được ghi trong CLI, constants của script và provenance hiệu lực của mỗi lần chạy. File YAML không được dùng đã được bỏ để tránh hai nguồn tham số.
 
 \chapter{Thiết kế thí nghiệm và metric}
 \section{Dữ liệu và split}
 Dataset phải có instance ground truth hợp pháp, ví dụ DSB2018 hoặc MoNuSeg.
 Raw image và label TIFF cùng basename nằm trong `data/raw` và
-\texttt{data/ground\_truth}. Development dùng để debug; validation chọn tham số; test
+\path{data/ground_truth}. Development dùng để debug; validation chọn tham số; test
 chỉ đánh giá cuối. Không tối ưu threshold trên test set.
 
 \section{Matching và metric}
@@ -458,46 +471,39 @@ Otsu, Watershed và StarDist Python chạy trên toàn bộ 50 test images. Wate
 Fiji/ImageJ chạy trên ba ca low/median/high cố định để kiểm chứng cross-platform
 với output label thật, không được gộp vào ước lượng 50 ảnh. Báo cáo mean $\pm$
 SD, số ảnh và runtime riêng cho từng stratum. Script
-\texttt{scripts/run\_dsb2018\_benchmark.py} sinh benchmark 50 ảnh; script
-\texttt{scripts/evaluate\_fiji\_reference.py} đọc Label Image Fiji rồi đo metric.
+\path{scripts/run_dsb2018_benchmark.py} sinh benchmark 50 ảnh; script
+\path{scripts/evaluate_fiji_reference.py} đọc Label Image Fiji rồi đo metric.
 
 \chapter{Kết quả và thảo luận}
 \section{Benchmark tái lập được trên DSB2018}
 Nhóm chạy ba phương pháp trên 50 ảnh của test split trong archive DSB2018 do
 StarDist công bố \citep{caicedo2019nucleus}. Ground truth là instance label
 TIFF; không dùng binary mask. Watershed chọn `min\_distance` bằng sweep trên 30
-ảnh lấy mẫu seed 42 từ 447 ảnh train, đạt AP@0.50 cao nhất tại giá trị 9. Các
+ảnh lấy mẫu seed 42 từ 447 ảnh train, đạt AP@0.50 validation cao nhất tại giá trị 9. Danh sách 30 image ID được lưu trong validation\_images.csv. Các
 50 ảnh test không tham gia chọn tham số. StarDist Python dùng model
 \texttt{2D\_versatile\_fluo}, percentile $1/99.8$, default probability threshold
-$0.479071$ và NMS threshold $0.3$ từ model. Runtime CPU không tính tải model
-và warm-up. Lệnh benchmark Python sinh toàn bộ CSV, figure và provenance;
-đường dẫn tái lập được liệt kê trong README và Phụ lục C.
+$0.479071$ và NMS threshold $0.3$ từ model. Runtime CPU tính cả chuẩn hoá, inference và hậu xử lý sau warm-up; không tính đọc/ghi file và tải model. Các thiết bị TensorFlow, phiên bản package, hash weight và hash dữ liệu được lưu trong provenance và manifest. Lệnh benchmark Python sinh toàn bộ CSV, figure và provenance;
+đường dẫn tái lập được liệt kê trong README và phụ lục tái lập.
 
 \begin{longtable}{lrrrr}
-\caption{Metric instance. Ba baseline/Python dùng 50 test images; Fiji/ImageJ dùng ba ca kiểm chứng cố định.}\label{tab:main}\\
+\caption{Metric instance trên cùng 50 test images. Fiji được đánh giá riêng ở bảng đối chiếu.}\label{tab:main}\\
 \toprule
 Method & AP@.50 & AP@.75 & AP@.90 & PQ@.50\\
 \midrule\endfirsthead
 \toprule Method & AP@.50 & AP@.75 & AP@.90 & PQ@.50\\\midrule\endhead
-Otsu & $0.643\pm0.238$ & $0.453\pm0.276$ & $0.223\pm0.221$ & $0.627\pm0.208$\\
-Watershed & $0.715\pm0.199$ & $0.501\pm0.266$ & $0.214\pm0.207$ & $0.677\pm0.166$\\
-StarDist Fiji ($n=3$) & $0.801\pm0.244$ & $0.764\pm0.207$ & $0.406\pm0.324$ & $0.788\pm0.160$\\
-StarDist Python & $0.853\pm0.120$ & $0.692\pm0.235$ & $0.305\pm0.313$ & $0.785\pm0.110$\\
+\BenchmarkRows
 \bottomrule
 \end{longtable}
 
 \clearpage
 
 \begin{longtable}{lrrr}
-\caption{Metric foreground, sai số đếm và runtime. Mỗi dòng Fiji là mean $\pm$ SD trên ba ca.}\label{tab:secondary}\\
+\caption{Metric foreground, sai số đếm và runtime Python/baseline, mean $\pm$ SD trên 50 ảnh.}\label{tab:secondary}\\
 \toprule
 Method & Dice foreground & MAE count & Runtime (s/image)\\
 \midrule\endfirsthead
 \toprule Method & Dice foreground & MAE count & Runtime (s/image)\\\midrule\endhead
-Otsu & $0.895\pm0.070$ & 14.06 & 0.0100\\
-Watershed & $0.894\pm0.071$ & 6.94 & 0.0238\\
-StarDist Fiji ($n=3$) & $0.950\pm0.017$ & $6.00\pm7.21$ & $1.420\pm0.590$\\
-StarDist Python & $0.916\pm0.049$ & 3.44 & 0.1120\\
+\SecondaryRows
 \bottomrule
 \end{longtable}
 
@@ -505,7 +511,7 @@ StarDist Python & $0.916\pm0.049$ & 3.44 & 0.1120\\
 là kiểm chứng triển khai trên ba ca đã cố định; không phải ước lượng chung cho
 50 test images nên không dùng để xếp hạng trực tiếp với ba dòng $n=50$. Runtime
 Fiji đo command CPU, bao gồm inference/model initialization của process Java;
-runtime Python là inference sau warm-up.\normalsize
+runtime Python bao gồm tiền xử lý, inference và hậu xử lý sau warm-up. Không dùng hai khoảng đo này để xếp hạng tốc độ Fiji và Python.\normalsize
 
 \begin{figure}[htbp]
 \centering
@@ -518,7 +524,7 @@ trình bày trong Bảng \ref{tab:main}.}
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{../results/dsb2018_benchmark/figures/qualitative_median.png}
-\caption{Case trung vị theo AP@0.50 của StarDist trong 50 ảnh test. Màu biểu
+\caption{Ca median được giữ cố định từ lần chạy gốc có clipping, không chọn lại theo kết quả mới. Màu biểu
 diễn ID instance, không phải lớp semantic. Otsu gộp nhiều nhân tiếp xúc;
 Watershed tách được một phần; StarDist bám theo instance ground truth sát hơn.}
 \label{fig:qualitative-median}
@@ -527,7 +533,7 @@ Watershed tách được một phần; StarDist bám theo instance ground truth 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{../results/dsb2018_benchmark/figures/qualitative_low.png}
-\caption{Case có AP@0.50 thấp nhất của StarDist trong test split. Hình này
+\caption{Ca low được giữ cố định từ lần chạy gốc, không khẳng định vẫn có AP thấp nhất sau cập nhật. Hình này
 được báo cáo cùng case trung vị để tránh chỉ chọn ví dụ thuận lợi.}
 \label{fig:qualitative-low}
 \end{figure}
@@ -542,22 +548,88 @@ instance; figure được sinh trực tiếp từ TIFF plugin xuất.}
 \end{figure}
 
 \section{Cách đọc kết quả}
-Trên 50 ảnh test, StarDist đạt AP@0.50 $0.853\pm0.120$ và PQ
-$0.785\pm0.110$, cao hơn Watershed ($0.715\pm0.199$;
-$0.677\pm0.166$) và Otsu ($0.643\pm0.238$; $0.627\pm0.208$). Dice foreground
-của Otsu và Watershed gần $0.895$, nhưng AP instance thấp hơn: kết quả này
+Trên 50 ảnh test, StarDist đạt AP@0.50 \StarAP{} và PQ
+\StarPQ{}, so với Watershed (\WaterAP{}; \WaterPQ{}) và Otsu (\OtsuAP{}; \OtsuPQ{}). Hai baseline vẫn phủ foreground khá tốt nhưng AP instance thấp hơn: kết quả này
 cho thấy Dice toàn foreground không đủ để đánh giá tách object. Watershed giảm
-MAE đếm từ 14.06 xuống 6.94 so với Otsu; StarDist giảm tiếp còn 3.44. Ở
+MAE đếm từ \OtsuMAE{} xuống \WaterMAE{} so với Otsu; StarDist đạt \StarMAE{}. Ở
 $\tau=0.90$, metric của cả ba giảm mạnh, phản ánh yêu cầu chính xác biên rất
-nghiêm ngặt. StarDist chậm hơn baseline trên CPU (0.112 s/ảnh so với 0.024 s
-Watershed), đổi lại tách instance tốt hơn trên benchmark này. Trên ba ca kiểm
+nghiêm ngặt. StarDist có runtime CPU \StarTime{} s/ảnh so với \WaterTime{} s/ảnh của Watershed, đổi lại tách instance tốt hơn trên benchmark này. Trên ba ca kiểm
 chứng, plugin Fiji/ImageJ đạt AP@0.50 $0.801\pm0.244$, PQ $0.788\pm0.160$ và
-Dice $0.950\pm0.017$; các TIFF/metric làm bằng chứng tương thích, không thay
+Dice $0.950\pm0.017$; các TIFF/metric chứng minh workflow chạy được; bảng đối chiếu trực tiếp bổ sung đo tương ứng hai đầu ra, không thay
 thế benchmark $n=50$.
+
+\section{Đối chiếu trực tiếp Fiji--Python: trả lời RQ2}
+Script \path{scripts/compare_fiji_python.py} ghép trực tiếp label Python
+với label Fiji trên ba image ID cố định. Nhãn Python chỉ là tham chiếu so sánh,
+không thay ground truth sinh học. Tiêu chí mô tả dùng trong script là F1 tại
+IoU 0.50 ít nhất 0.95 và Dice foreground ít nhất 0.95. Đây là ngưỡng kỹ thuật
+cho ba ca, không phải kiểm định tương đương thống kê.
+\begin{center}
+\begin{tabular}{lrrrrr}
+\toprule
+Ca & $N_{Python}$ & $N_{Fiji}$ & F1@.50 & IoU ghép TB & Dice\\
+\midrule
+\CrossRows
+\bottomrule
+\end{tabular}
+\end{center}
+Ca median và high đạt tiêu chí mô tả; ca low không đạt: Python có 9 object,
+Fiji có 11 object, F1 0.900 và Dice 0.940. Vì vậy kết luận đúng là hai triển
+khai gần nhau ở hai ca, chưa đồng nhất trên cả ba. Ca low còn hai object Fiji
+không ghép được với Python, cần kiểm tra tín hiệu/biên của từng object thay
+vì chỉ nhìn trung bình. Overlay đánh dấu object Python chưa ghép bằng xanh lá,
+Fiji chưa ghép bằng tím, sai khác pixel/biên sau matching bằng vàng.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.94\textwidth]{../results/cross_platform/error_overlays.png}
+\caption{Sai khác trực tiếp giữa hai đầu ra. ID nhãn được ghép một-một trước
+khi đo pixel agreement trên hợp foreground, tránh kết luận sai do đổi thứ tự ID.}
+\end{figure}
+
+Python dùng percentile tuyến tính NumPy và phép affine không clipping.
+CSBDeep Java 0.6.0 dùng histogram percentile và chặn giá trị âm về 0 dù
+\texttt{clip=false}. Fiji còn đặt exclude boundary 2 pixel; hai nền tảng dùng
+TensorFlow khác phiên bản. Những khác biệt có thật này được lưu trong CSV và
+provenance; thí nghiệm hiện tại chưa cô lập từng nguyên nhân nên không quy
+hai object chênh lệch cho riêng một bước.
+
+\section{Ảnh hưởng probability/NMS: trả lời RQ3}
+Script \path{scripts/run_validation_ablation.py} đánh giá 5 probability
+threshold và 5 NMS threshold trên đúng 30 ảnh train-validation đã chốt.
+Mỗi ảnh chỉ tính CNN một lần rồi thay tham số hậu xử lý; do đó sweep không
+báo thời gian inference. CSV có mean và SD của AP, F1, PQ, số object, FP, FN
+và sai số đếm. Không sử dụng ảnh test để chọn ngưỡng.
+
+Khi tăng probability threshold từ 0.3 lên 0.7, AP@0.50 validation giảm từ
+0.864 xuống 0.777; số object trung bình giảm từ 35.47 xuống 31.50; FN tăng từ
+3.13 lên 6.47. Ngưỡng cao bỏ thêm candidate yếu và có thể bỏ sót nhân.
+Quét NMS giữ probability mặc định 0.479071; quét probability giữ NMS 0.3.
+Hai biểu đồ cho thấy cả thay đổi chất lượng và thay đổi số lượng, kèm SD giữa ảnh.
+Benchmark test vẫn giữ ngưỡng model công bố, không đổi theo sweep này.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{../results/validation_ablation/probability_sweep.png}
+\caption{Probability sweep trên 30 ảnh validation; error bar là SD giữa ảnh.}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{../results/validation_ablation/nms_sweep.png}
+\caption{NMS sweep trên cùng validation, giữ probability mặc định.}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.95\textwidth]{../results/validation_ablation/threshold_examples.png}
+\caption{Ví dụ ở ID validation đầu tiên đã chốt, không chọn theo score.
+Hai đầu mút probability/NMS kèm FP/FN minh hoạ candidate được giữ/bỏ khi đổi
+ngưỡng. Màu là ID instance; kết luận định lượng vẫn dựa toàn bộ 30 ảnh.}
+\end{figure}
 
 \section{Đe doạ tới tính hợp lệ}
 Các kết luận được giới hạn bởi bốn yếu tố. (i) Model pretrained có thể không
-phù hợp stain hoặc optics của dữ liệu mới; chưa có fine-tuning trên DSB2018.
+phù hợp stain hoặc optics của dữ liệu mới; chưa có fine-tuning trong repo; dữ liệu huấn luyện của weight pretrained có nguồn từ DSB2018, chưa xác minh độc lập danh sách image ID so với 50 ảnh test. Vì vậy kết quả là đánh giá pretrained trên split công bố, chưa phải bằng chứng tổng quát hoá độc lập khỏi dữ liệu huấn luyện weight.
 (ii) Kết quả Fiji chỉ có ba ca cố định, vì vậy là kiểm chứng tương thích chứ
 không phải ước lượng hiệu năng cùng cỡ mẫu $n=50$ của Python. (iii) Khác biệt
 Fiji--Python có thể do version, normalization, tile hoặc NMS, không nhất thiết
@@ -581,7 +653,7 @@ số tia, robustness với noise và đánh giá 3D.
 
 \begin{longtable}{>{\raggedright\arraybackslash}p{4.7cm}>{\raggedright\arraybackslash}p{8.3cm}}
 \toprule Thành viên & Công việc và artefact\\\midrule\endfirsthead
-Nguyễn Hồng Quang\\B23DCVT361 & Package Python, test, CLI và \texttt{scripts/run\_experiment.py}.\\
+Nguyễn Hồng Quang\\B23DCVT361 & Package Python, test, CLI và \path{scripts/run_experiment.py}.\\
 Nguyễn Trọng Nam Khánh\\B23DCCE052 & Workflow Fiji/ImageJ: plugin StarDist, screenshot thao tác, macro, run log và label TIFF.\\
 Vũ Dũng\\B23DCVT110 & Tìm kiếm, thu thập và chuẩn bị dataset; tổ chức split và ground truth.\\
 \bottomrule
@@ -591,20 +663,25 @@ Vũ Dũng\\B23DCVT110 & Tìm kiếm, thu thập và chuẩn bị dataset; tổ c
 \section{Cài môi trường và kiểm thử}
 \begin{lstlisting}[language=Python]
 python -m venv .venv
-.venv\Scripts\python.exe -m pip install -e ".[dev,stardist]"
-.venv\Scripts\python.exe -m pytest -q
+python -m pip install -r requirements-model.txt
+python -m pip install -e ".[dev]"
+python -m pytest -q
+python -m pytest -m integration -q
 .venv\Scripts\ruff.exe check src tests scripts
 \end{lstlisting}
 \section{Tạo lại kết quả và artefact}
 \begin{lstlisting}[language=Python]
-.venv\Scripts\python.exe scripts/run_real_demo.py
-.venv\Scripts\python.exe scripts/build_fiji_workflow_evidence.py
+python scripts/run_dsb2018_benchmark.py
+python scripts/run_validation_ablation.py
+python scripts/evaluate_fiji_reference.py
+python scripts/compare_fiji_python.py
+python scripts/build_fiji_workflow_evidence.py
+python scripts/build_report_data.py
 \end{lstlisting}
 Lệnh benchmark chính là `scripts/run\_dsb2018\_benchmark.py`; dataset TIFF đã
 có trong repository, còn script chỉ tải archive DSB2018 và model
 `2D\_versatile\_fluo` qua API chính thức khi chưa có cache. Nó lưu CSV, label
-TIFF minh hoạ và figures. Lần chạy đã ghi trong báo cáo dùng CPU
-Windows; TensorFlow native Windows từ 2.11 không dùng CUDA, nên benchmark GPU
+TIFF minh hoạ và figures. Lần chạy cập nhật ngày 24/10/2026 dùng CPU Intel macOS 15.7, Python 3.11.9, TensorFlow 2.15.1; TensorFlow native Windows từ 2.11 không dùng CUDA, nên benchmark GPU
 phải ghi môi trường WSL2/Linux riêng. Phần ImageJ/Fiji tham chiếu đã lưu label
 TIFF, figure, metric và run log trên ba ca.
 

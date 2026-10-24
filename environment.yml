@@ -5,4 +5,5 @@ dependencies:
   - python=3.11
   - pip
   - pip:
+      - -r requirements-model.txt
       - -e .[dev,stardist]

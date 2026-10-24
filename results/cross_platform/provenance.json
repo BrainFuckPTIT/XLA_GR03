@@ -1,0 +1,9 @@
+{
+  "comparison": "Python labels used as reference, not as biological ground truth",
+  "criterion": "F1 matching@0.50 >= 0.95 AND foreground Dice >= 0.95",
+  "criterion_scope": "descriptive acceptance threshold, not statistical equivalence",
+  "cases": "historical test-derived fixed cases; not a random sample",
+  "normalization_limit": "numpy linear and Java histogram percentiles differ",
+  "runtime_limit": "Fiji cold command vs Python warm segmentation; no speed ranking",
+  "label_id_policy": "pixel agreement after matching; foreground union only"
+}

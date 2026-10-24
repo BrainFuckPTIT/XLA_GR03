@@ -1,14 +1,9 @@
-# Báo cáo
+# Báo cáo chính
 
-Nguồn chính là `report.tex`, biên dịch bằng XeLaTeX. Nó đã chứa toàn bộ nội
-dung lý thuyết, Fiji, Python, thiết kế thí nghiệm và bảng kết quả có kiểm soát.
-Để đạt khoảng 30 trang khi nộp, thêm ảnh UI Fiji có chú thích, raw/GT/prediction
-overlays, 2 biểu đồ ablation, bảng per-fold và phụ lục run log; không kéo dài
-bằng cách lặp lại lý thuyết.
+`report.tex` và `report.pdf` là nguồn và bản nộp hiện tại.
+Bảng/biến trong `generated/` sinh từ CSV bằng `python scripts/build_report_data.py`.
+Không sửa tay các bảng đã sinh. Ảnh và code listing tham chiếu từ thư mục anh em.
 
-Quy ước đề xuất:
-
-- `report.docx`: bản nộp;
-- `report.pdf`: bản kiểm tra cuối;
-- `figures/`: hình dùng trong báo cáo;
-- `tables/`: bảng số liệu đã chốt.
+Biên dịch bằng Tectonic hoặc XeLaTeX từ thư mục `report` (xem `docs/06_tai_lap.md`).
+TeX Gyre Termes hỗ trợ tiếng Việt và không cần font Times New Roman riêng.
+Số trang phụ thuộc code listing/phụ lục; không thêm nội dung chỉ để kéo dài báo cáo.

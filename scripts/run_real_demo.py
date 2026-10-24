@@ -20,6 +20,7 @@ from stardist.models import StarDist2D
 from tifffile import imwrite
 
 from xla_gr03.baselines import segment_otsu, segment_watershed
+from xla_gr03.experiments import runtime_provenance
 from xla_gr03.io import save_labels
 from xla_gr03.metrics import evaluate_at_thresholds, evaluate_instances
 from xla_gr03.preprocessing import percentile_normalize
@@ -81,8 +82,8 @@ def predict(
     probability_threshold: float,
     nms_threshold: float,
 ) -> tuple[np.ndarray, float]:
-    normalized = percentile_normalize(image, pmin=1.0, pmax=99.8, axes=(0, 1))
     start = time.perf_counter()
+    normalized = percentile_normalize(image, pmin=1.0, pmax=99.8, axes=(0, 1), clip=False)
     labels, _ = model.predict_instances(
         normalized,
         axes="YX",
@@ -93,6 +94,9 @@ def predict(
 
 
 def main() -> None:
+    import tensorflow as tf
+
+    tf.config.set_visible_devices([], "GPU")
     np.random.seed(42)
     image, truth = test_image_nuclei_2d(return_mask=True)
     RAW.parent.mkdir(parents=True, exist_ok=True)
@@ -126,6 +130,7 @@ def main() -> None:
             "model": "2D_versatile_fluo",
             "pmin": 1.0,
             "pmax": 99.8,
+            "clip": False,
             "probability_threshold": 0.5,
             "nms_threshold": 0.3,
             "device": "CPU",
@@ -187,6 +192,9 @@ def main() -> None:
                 "caveat": "Demonstration only. This single image is not an independent test set.",
                 "model": "2D_versatile_fluo",
                 "random_seed": 42,
+                "normalization_clip": False,
+                "runtime_scope": "warm preprocessing+inference+postprocessing; no I/O",
+                "environment": runtime_provenance(model),
             },
             ensure_ascii=False,
             indent=2,

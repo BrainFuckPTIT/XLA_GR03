@@ -37,7 +37,7 @@ def read_row(path: Path, predicate: Callable[[dict[str, str]], bool]) -> dict[st
 
 
 def normalize_percentile(image: np.ndarray, low: float, high: float) -> np.ndarray:
-    """Match the percentile clipping recorded for the Fiji plugin run."""
+    """Display-only contrast stretch, not the plugin's internal normalized tensor."""
     lower, upper = np.percentile(image, (low, high))
     return np.clip((image.astype(np.float32) - lower) / (upper - lower + 1e-8), 0, 1)
 
@@ -99,7 +99,7 @@ def main() -> None:
     axes[0].imshow(image, cmap="gray")
     axes[0].set_title("Bước 1 - TIFF input", fontweight="bold")
     axes[1].imshow(normalized, cmap="gray", vmin=0, vmax=1)
-    axes[1].set_title("Bước 2 - Normalize 1/99.8", fontweight="bold")
+    axes[1].set_title("Hiển thị percentile 1/99.8 (minh hoạ)", fontweight="bold")
     axes[2].imshow(label_rgb(prediction))
     axes[2].set_title("Bước 3 - Label Image Fiji", fontweight="bold")
     axes[3].imshow(overlay_boundaries(normalized, ground_truth, prediction))

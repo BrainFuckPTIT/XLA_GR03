@@ -1,171 +1,116 @@
 # XLA_GR03 — Instance Segmentation với StarDist
 
-[![CI](https://github.com/BrainFuckPTIT/XLA_GR03/actions/workflows/ci.yml/badge.svg)](https://github.com/BrainFuckPTIT/XLA_GR03/actions/workflows/ci.yml)
-[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Fiji](https://img.shields.io/badge/Fiji%2FImageJ-reference-00AEEF)](https://imagej.net/plugins/stardist)
+Bài tập lớn môn **Xử lý ảnh số**, nhóm 03, PTIT. Repo nghiên cứu StarDist 2D,
+đánh giá model pretrained với Otsu và marker-controlled Watershed trên DSB2018,
+và đối chiếu đầu ra Python với plugin Fiji/ImageJ trên ba ảnh cố định.
 
-Bài tập lớn môn **Xử lý ảnh số**: nghiên cứu, cài đặt, thực nghiệm và đánh
-giá thuật toán phân đoạn từng đối tượng bằng Deep Learning với **StarDist**.
-Fiji/ImageJ được sử dụng làm nền tảng tham chiếu; Otsu và
-marker-controlled Watershed là hai phương pháp đối chứng.
+Nhóm tự viết các hàm hình học tham chiếu và metric instance. Inference dùng
+CNN, weight và hậu xử lý chính thức của StarDist; bộ giải Hungarian dùng SciPy.
+Repo không tuyên bố tự xây/huấn luyện lại toàn bộ mạng.
 
-## Mục tiêu
+## Cài đặt
 
-- Trình bày cơ sở toán học của probability map, star-convex representation,
-  CNN/U-Net và Non-Maximum Suppression.
-- Chạy và kiểm chứng StarDist 2D trên Fiji/ImageJ.
-- Cài đặt pipeline Python có thể tái lập.
-- Tự cài đặt các thành phần cốt lõi: normalized EDT theo instance, khoảng
-  cách theo tia, polygon decoding, polygon NMS và instance matching.
-- So sánh StarDist, Otsu và Watershed bằng metric định lượng.
-
-## Cấu trúc repository
-
-```text
-XLA_GR03/
-├── .github/                 CI và mẫu issue/pull request
-├── configs/                 Cấu hình thí nghiệm có thể version-control
-├── data/                    DSB2018 benchmark TIFF đã versioned và hướng dẫn dữ liệu
-├── docs/                    Lý thuyết, tài liệu và phân công
-├── fiji/                    Workflow, macro/script Fiji
-├── models/                  Hướng dẫn model; không commit weight lớn
-├── notebooks/               Notebook khám phá và demo
-├── references/              Tài liệu tham khảo BibTeX
-├── report/                  Báo cáo cuối kỳ
-├── results/                 Bảng/biểu đồ kết quả được chọn lọc
-├── scripts/                 Entry point chạy từ command line
-├── slides/                  PowerPoint nguồn và liên kết Canva presentation
-├── src/xla_gr03/            Mã nguồn Python chính
-└── tests/                   Unit test
-```
-
-## Cài đặt nhanh
-
-Khuyến nghị Python 3.10 hoặc 3.11 cho môi trường StarDist/TensorFlow trên
-Windows.
+Dùng **Python 3.11** cho thí nghiệm TensorFlow/Keras 2 đã kiểm chứng.
 
 ```bash
 python -m venv .venv
-```
-
-Kích hoạt môi trường:
-
-```powershell
-.venv\Scripts\Activate.ps1
-```
-
-```bash
-python -m pip install --upgrade pip
+# macOS/Linux:
+source .venv/bin/activate
+# Windows PowerShell: .venv\Scripts\Activate.ps1
+python -m pip install -r requirements-model.txt
 python -m pip install -e ".[dev]"
 ```
 
-Để chạy model StarDist pretrained:
+`requirements-model.txt` cố định các thư viện tính toán/model chính. Freeze đầy
+đủ của lần chạy tham chiếu, CPU, phiên bản và hash model có trong
+`results/dsb2018_benchmark/`. Freeze là bản ghi môi trường macOS x86_64 đã chạy,
+không phải cam kết mọi package phụ cài được trên mọi hệ điều hành.
+
+Python 3.10–3.12 vẫn chạy package cơ sở với `pip install -e ".[dev]"`.
+Dùng Python 3.11 khi cần model hoặc integration tests.
+
+## Chạy trên dữ liệu đã có
+
+Các cặp TIFF nằm ở `data/dsb2018/dsb2018/{train,test}/{images,masks}/`.
+CLI nhận đường dẫn ảnh cụ thể, ví dụ:
 
 ```bash
-python -m pip install -e ".[dev,stardist]"
+xla-gr03 segment input.tif labels.tif --method otsu --min-size 20
+xla-gr03 segment input.tif labels.tif --method watershed --min-distance 9
+xla-gr03 segment input.tif labels.tif --method stardist --model 2D_versatile_fluo
+xla-gr03 evaluate truth.tif labels.tif --thresholds 0.5 0.75 0.9 --output-json metrics.json
 ```
 
-## Sử dụng
+StarDist dùng percentile 1/99.8, affine không clipping theo Python CSBDeep.
+`--clip` chỉ bật khi chủ đích chạy thí nghiệm cắt input về [0,1]; lựa chọn được
+lưu trong metadata. Không giả định chuẩn hoá Java giống hệt NumPy.
 
-### Otsu
+## Tái tạo kết quả
+
+Chạy theo thứ tự sau từ gốc repo, sau khi cài môi trường model:
 
 ```bash
-xla-gr03 segment data/raw/example.tif results/otsu_labels.tif \
-  --method otsu --foreground bright --min-size 20
+python scripts/run_dsb2018_benchmark.py
+python scripts/run_validation_ablation.py
+python scripts/evaluate_fiji_reference.py
+python scripts/compare_fiji_python.py
+python scripts/build_fiji_workflow_evidence.py
+python scripts/build_report_data.py
 ```
 
-### Marker-controlled Watershed
+Benchmark chạy CPU, kiểm tra cặp ảnh/mask và trùng hash giữa train/test,
+ghi 30 image ID validation, hash dữ liệu/weight và môi trường hiệu lực.
+Runtime Python/baseline bao gồm tiền xử lý + phân đoạn + hậu xử lý sau warm-up,
+không tính đọc/ghi file hoặc tải model.
 
-```bash
-xla-gr03 segment data/raw/example.tif results/watershed_labels.tif \
-  --method watershed --foreground bright --min-size 20 --min-distance 7
-```
+Sweep chạy trên đúng 30 ảnh validation, giữ test ở threshold model công bố.
+Ba ca Fiji giữ image ID lịch sử để so sánh theo cặp, không chọn lại khi thay
+đổi pipeline. Bảng Fiji–Python hiện ghi rõ ca low chưa đạt tiêu chí mô tả
+F1≥0.95 và Dice≥0.95; không kết luận hai triển khai giống hệt nhau.
 
-### StarDist pretrained
+Để tạo lại TIFF bằng plugin Java 8/Maven, xem
+[hướng dẫn Fiji](fiji/scripts/README.md). Đánh giá TIFF đã commit không cần Java.
 
-```bash
-xla-gr03 segment data/raw/example.tif results/stardist_labels.tif \
-  --method stardist --model 2D_versatile_fluo --prob-thresh 0.5 \
-  --nms-thresh 0.3
-```
-
-Với ảnh H&E RGB, dùng model `2D_versatile_he`.
-
-### Đánh giá label image
-
-```bash
-xla-gr03 evaluate data/ground_truth/example.tif \
-  results/stardist_labels.tif --thresholds 0.5 0.75 0.9
-```
-
-### Đánh giá output StarDist Fiji/ImageJ
-
-Ba label TIFF thực tế của plugin trên các ca DSB2018 low/median/high đã có ở
-`results/fiji_labels/`. Tái tạo bảng metric và panel bằng:
-
-```powershell
-.venv\Scripts\python.exe scripts\evaluate_fiji_reference.py
-.venv\Scripts\python.exe scripts\build_fiji_workflow_evidence.py
-```
-
-Xem `fiji/scripts/run_stardist_headless.ps1` để chạy lại runner Java không GUI;
-`fiji/run_log_dsb2018_reference.csv` ghi chính xác artifact plugin, model,
-normalization, threshold, TensorFlow/Java runtime và thời gian từng ca.
-Lệnh thứ hai dựng lại panel input--normalization--Label Image--overlay--metric
-trong `results/fiji_reference/fiji_workflow_evidence.png` từ TIFF/log thực tế.
+Script tổng quát `scripts/run_experiment.py` báo lỗi khi thiếu mask/prediction.
+`--allow-missing-stardist` cho phép ghi dòng `missing_prediction` rõ ràng.
+Runtime nhãn nhập sẵn lấy từ `--run-log`, nếu không có thì để trống.
 
 ## Kiểm thử
 
 ```bash
-pytest
+pytest -q
+pytest -m integration -q
 ruff check .
 ```
 
-## Quy ước dữ liệu
+Unit tests kiểm tra CLI/I/O, split/merge, ghép cặp sát ngưỡng, dữ liệu thiếu,
+chuẩn hoá và geometry. Integration tests chạy model thật, so metric với
+`stardist.matching`, so normalization/EDT/ray với thư viện chính thức.
+Lần đầu cần mạng để lấy weight; CI có job integration riêng trên Python 3.11.
 
-- Ảnh đầu vào giữ nguyên bit depth khi lưu trong `data/raw/`.
-- Ground truth và prediction là ảnh nhãn integer.
-- Nền mang nhãn `0`; mỗi đối tượng mang một số nguyên dương duy nhất.
-- Tên cặp ảnh/nhãn nên giống nhau, ví dụ `image_001.tif`.
-- DSB2018 đã giải nén (497 cặp TIFF, khoảng 194 MiB) được versioned để tái lập
-  benchmark; không commit model weight, môi trường ảo, dữ liệu có license không
-  rõ ràng hoặc output thô không dùng trong báo cáo. Xem
-  [hướng dẫn dữ liệu](data/README.md).
+## Tài liệu và bản nộp chính
 
-## Tài liệu
+- [Danh mục bản nộp](SUBMISSION.md).
+- [Báo cáo PDF](report/report.pdf), [nguồn LaTeX](report/report.tex).
+- [Slide cập nhật](slides/stardist_presentation_completed.pptx),
+  [hướng dẫn dựng slide](slides/README.md).
+- [Lý thuyết](docs/01_ly_thuyet_stardist.md),
+  [thiết kế thực nghiệm](docs/04_thiet_ke_thuc_nghiem.md),
+  [trạng thái kiểm tra](docs/05_trang_thai_nop_bai.md),
+  [hướng dẫn tái lập](docs/06_tai_lap.md).
+- `results/dsb2018_benchmark/`: 50 ảnh test, per-image CSV, mean/SD, provenance.
+- `results/validation_ablation/`: sweep probability/NMS trên 30 ảnh validation.
+- `results/cross_platform/`: bảng đối chiếu trực tiếp và overlay sai khác.
+- `results/fiji_labels/`, `results/fiji_reference/`: label/log lịch sử và metric.
 
-- [Cơ sở lý thuyết StarDist](docs/01_ly_thuyet_stardist.md)
-- [Tổng hợp tài liệu](docs/02_tong_hop_tai_lieu.md)
-- [Phạm vi thành viên 2](docs/ke_hoach_thanh_vien_2.md)
-- [Thiết kế thí nghiệm và metric](docs/04_thiet_ke_thuc_nghiem.md)
-- [Trạng thái kiểm tra trước khi nộp](docs/05_trang_thai_nop_bai.md)
-- [Protocol Fiji/ImageJ](fiji/workflows/stardist_fiji_protocol.md)
-- [Báo cáo LaTeX](report/report.tex)
-- [Slide PowerPoint 25 trang](slides/stardist_presentation_submission_v8.pptx)
-- [Canva Presentation 23 slide — bản chỉnh sửa](https://www.canva.com/d/dXSeOCrNIgRyJam)
-
-## Artefact nộp bài
-
-- `report/report.pdf` và `report/report.tex`: báo cáo hoàn chỉnh gồm lý thuyết,
-  Python, Fiji/ImageJ, protocol, code, metric, benchmark và ảnh kết quả thật.
-- `scripts/run_dsb2018_benchmark.py`: benchmark 50 test images DSB2018, có
-  validation tách biệt để chọn tham số Watershed.
-- `results/dsb2018_benchmark/`: CSV từng ảnh, bảng mean ± SD, validation sweep
-  và biểu đồ benchmark.
-- `results/fiji_labels/` và `results/fiji_reference/`: TIFF label thật, metric,
-  provenance và panel low/median/high từ plugin StarDist Fiji/ImageJ.
-- `slides/stardist_presentation_submission_v8.pptx`: deck 25 slide có thể
-  chỉnh sửa, trình bày lý thuyết, Python, thao tác Fiji/ImageJ, benchmark 50 ảnh
-  và evidence Fiji/ImageJ n=3 tách biệt.
-- Canva Presentation (23 slide): bản theo template Canva, đã chèn chuỗi ảnh
-  chứng minh Fiji/ImageJ, ảnh định tính và biểu đồ benchmark thực nghiệm.
-- `fiji/run_log_dsb2018_reference.csv`: log tham số/runtimes của lần chạy plugin.
-- `results/tables/final_metrics_template.csv`: bảng metric tổng hợp, nêu rõ
-  stratum Fiji n=3 không so sánh trực tiếp với n=50.
-- [Quy trình đóng góp](CONTRIBUTING.md)
+Dữ liệu 497 cặp TIFF đã có trong repo. Không commit môi trường, weight model
+hoặc output tạm. Nguồn DSB2018 và ghi chú phân phối có trong `data/MANIFEST.md`.
+Weight pretrained có nguồn huấn luyện DSB2018; repo chưa xác minh độc lập
+image ID huấn luyện của weight với 50 ảnh test, nên kết luận giới hạn ở đánh
+giá pretrained trên split công bố. Ba ảnh Fiji không đại diện benchmark n=50.
 
 ## Nhóm thực hiện
 
-Nhóm 03 — Học viện Công nghệ Bưu chính Viễn thông (PTIT).
-
-Thông tin thành viên sẽ được cập nhật trong báo cáo cuối kỳ.
+- Nguyễn Hồng Quang — B23DCVT361.
+- Nguyễn Trọng Nam Khánh — B23DCCE052.
+- Vũ Dũng — B23DCVT110.

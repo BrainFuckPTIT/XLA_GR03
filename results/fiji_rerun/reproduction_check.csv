@@ -1,0 +1,4 @@
+image,tag,f1,dice,mean_matched_iou,arrays_equal
+608ff81c8a0c8b622f6648a9c7f935d85f0c503f515ef2ac3728387be1953ee8.tif,low,1.0,1.0,1.0,True
+b61d3fb0d0ebbee018346e0adeff9e9178f33aa95262779b3c196f93b4ace895.tif,median,1.0,1.0,1.0,True
+d8607b21411c9c8ab532faaeba15f8818a92025897950f94ee4da4f74f53660a.tif,high,1.0,1.0,1.0,True
