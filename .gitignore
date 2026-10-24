@@ -75,3 +75,13 @@ report/*.out
 report/*.toc
 report/*.lof
 report/*.lot
+
+# Beamer auxiliaries; main.pdf is versioned
+slides/latex/*.aux
+slides/latex/*.log
+slides/latex/*.nav
+slides/latex/*.snm
+slides/latex/*.toc
+slides/latex/*.out
+slides/latex/*.vrb
+slides/latex/*.xdv

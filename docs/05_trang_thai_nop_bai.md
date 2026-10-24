@@ -14,7 +14,7 @@ Cập nhật 24/10/2026. Danh mục file chính: `SUBMISSION.md`.
 | Java/Fiji chạy lại | `fiji/pom.xml`, `scripts/run_fiji_reference.py`, `results/fiji_rerun/` | Dựng Maven, chạy Java 8/TensorFlow JNI 1.12 trên macOS Intel; ba mảng label trùng hoàn toàn output lịch sử |
 | Tests | `tests/`, CI hai jobs | 39 tests đạt khi chạy cả unit và integration; model thật và đối chiếu thư viện chuẩn; coverage gộp 88% |
 | Báo cáo | `report/report.tex`, PDF, `report/generated/` | Bảng sinh từ CSV, thêm RQ2/RQ3 và giới hạn; font TeX Gyre Termes |
-| Slide | `slides/stardist_presentation_completed.pptx` | 27 slide, số liệu cập nhật, bảng/chart editable; có render/finalizer; bản cũ ở archive |
+| Slide | `slides/latex/main.pdf` | 27 slide Beamer 16:9; nguồn `slides/latex/`, biểu đồ PGFPlots, hình thật; PDF đã render kiểm tra. PPTX giữ làm tùy chọn |
 
 ## Giới hạn được công bố
 

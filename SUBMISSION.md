@@ -6,8 +6,8 @@ Các đường dẫn dưới đây là bản chính, đồng bộ từ lần ch�
 |---|---|
 | Báo cáo | `report/report.pdf` |
 | Nguồn báo cáo | `report/report.tex`, `report/generated/`, `references/references.bib` |
-| Slide | `slides/stardist_presentation_completed.pptx` (27 slide) |
-| Nguồn slide | `slides/build_deck.mjs`, `slides/package.json`, `slides/README.md` |
+| Slide | `slides/latex/main.pdf` (27 slide, 16:9) |
+| Nguồn slide | `slides/latex/` (Beamer, TikZ, PGFPlots), `slides/stardist_beamer_source.zip` |
 | Code và kiểm thử | `src/xla_gr03/`, `scripts/`, `tests/`, `.github/workflows/ci.yml` |
 | Môi trường Python | `requirements-model.txt`, `environment.yml`, freeze trong benchmark |
 | Fiji | `fiji/pom.xml`, Java runner, `scripts/run_fiji_reference.py`, log/labels |
@@ -20,3 +20,6 @@ số liệu hiện tại. Canva cũ cũng chưa được đồng bộ trong đ�
 Phạm vi: pretrained inference và các thành phần geometry/metric tự viết.
 Không tuyên bố tự train CNN. Kết luận Fiji–Python chỉ áp dụng ba ca cố định và
 nêu rõ ca không đạt. Đối chiếu rubric môn học nếu yêu cầu tự huấn luyện mạng.
+
+Bản PowerPoint `slides/stardist_presentation_completed.pptx` được giữ làm bản tùy chọn.
+Bản PDF Beamer và mã LaTeX là slide chính theo yêu cầu mới.

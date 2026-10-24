@@ -1,0 +1,29 @@
+\usepackage{fontspec}
+\setsansfont{texgyreheros}[Extension=.otf,UprightFont=*-regular,BoldFont=*-bold,ItalicFont=*-italic,BoldItalicFont=*-bolditalic]
+\usepackage{polyglossia}
+\setdefaultlanguage{vietnamese}
+\usepackage{tikz,pgfplots,booktabs,array,mathtools}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\pgfplotsset{compat=1.18,every axis/.append style={font=\scriptsize,axis line style={gray!40},tick style={gray!40},grid=major,grid style={gray!12},legend style={draw=none,fill=none,font=\scriptsize},label style={font=\scriptsize}}}
+\definecolor{Navy}{HTML}{14263D}
+\definecolor{Red}{HTML}{C82333}
+\definecolor{Teal}{HTML}{087E8B}
+\definecolor{Amber}{HTML}{C77D19}
+\definecolor{Muted}{HTML}{526477}
+\setbeamercolor{normal text}{fg=Navy,bg=white}
+\setbeamercolor{structure}{fg=Teal}
+\setbeamercolor{frametitle}{fg=Navy}
+\setbeamercolor{alerted text}{fg=Red}
+\setbeamerfont{frametitle}{size=\Large,series=\bfseries}
+\setbeamerfont{footline}{size=\tiny}
+\setbeamersize{text margin left=9mm,text margin right=9mm}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize item}{\color{Teal}\small\textbullet}
+\setlength{\parskip}{3pt}
+\setbeamertemplate{frametitle}{\vspace{3mm}{\scriptsize\color{Red}\insertsectionhead\par}\vspace{1mm}\insertframetitle\par\vspace{1mm}}
+\setbeamertemplate{footline}{\hspace{9mm}\color{Muted}PTIT\enspace /\enspace XỬ LÝ ẢNH SỐ\hfill StarDist\hspace{5mm}\insertframenumber\,/\,27\hspace{9mm}\vspace{3mm}}
+\newcommand{\notefoot}[1]{\par\vspace{2mm}{\fontsize{7}{9}\selectfont\color{Muted}#1\par}}
+\newcommand{\lead}[1]{\par{\large\bfseries #1}\par\vspace{2mm}}
+\newcommand{\pic}[3]{\begin{minipage}[t]{#1\linewidth}\centering\includegraphics[width=\linewidth,height=32mm,keepaspectratio]{assets/#2}\par\vspace{1mm}{\small #3}\end{minipage}}
+\newcommand{\stepbox}[2]{\node[draw=Teal!35,fill=Teal!5,rounded corners=2pt,minimum width=28mm,minimum height=12mm,align=center,font=\small] (#1) {#2};}
+\input{generated/metrics.tex}

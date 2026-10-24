@@ -53,7 +53,14 @@ code listing và BibTeX nằm ở các thư mục anh em của `report/`.
 
 ## Slide
 
-Đọc `slides/README.md`. Có thể mở/chỉnh trực tiếp PPTX bằng PowerPoint hoặc
-LibreOffice mà không cần runtime tác giả. Dựng tự động cần Artifact Tool của
-Codex, nêu rõ trong dependency manifest; không yêu cầu đường dẫn tài khoản
-Windows của người viết cũ.
+Bản chính là Beamer 27 trang. Thư mục `slides/latex/` đóng gói đủ nguồn,
+font sử dụng từ TeX, ảnh và bảng; không cần môi trường model để biên dịch:
+
+```bash
+cd slides/latex
+tectonic main.tex
+# Hoặc chạy xelatex main.tex hai lần với TeX Live đầy đủ.
+```
+
+Đọc `slides/latex/README.md` để tái sinh hình/bảng từ kết quả thực nghiệm.
+PPTX cũ và hướng dẫn builder ở `slides/README.md` được giữ làm lựa chọn phụ.

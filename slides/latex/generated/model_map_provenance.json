@@ -1,0 +1,23 @@
+{
+  "image": "b61d3fb0d0ebbee018346e0adeff9e9178f33aa95262779b3c196f93b4ace895.tif",
+  "crop_yx": [
+    164,
+    252,
+    192,
+    192
+  ],
+  "model": "2D_versatile_fluo",
+  "grid_yx": [
+    2,
+    2
+  ],
+  "normalization": "NumPy percentile 1/99.8; clip=False",
+  "ray_channel": 0,
+  "ray_display_max_px": 29.74551744461062,
+  "probability_range": [
+    0,
+    1
+  ],
+  "maps": "actual model.predict output",
+  "target_edt": "xla_gr03.geometry.normalized_edt on the full ground truth"
+}

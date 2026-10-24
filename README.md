@@ -92,7 +92,7 @@ Lần đầu cần mạng để lấy weight; CI có job integration riêng trê
 
 - [Danh mục bản nộp](SUBMISSION.md).
 - [Báo cáo PDF](report/report.pdf), [nguồn LaTeX](report/report.tex).
-- [Slide cập nhật](slides/stardist_presentation_completed.pptx),
+- [Slide LaTeX/PDF chính](slides/latex/main.pdf), [mã nguồn Beamer](slides/latex/main.tex),
   [hướng dẫn dựng slide](slides/README.md).
 - [Lý thuyết](docs/01_ly_thuyet_stardist.md),
   [thiết kế thực nghiệm](docs/04_thiet_ke_thuc_nghiem.md),
