@@ -1,0 +1,11 @@
+# Python 3.11, CPU reference environment. Exact run freeze is saved with results.
+# TensorFlow 2.15 uses Keras 2, matching the StarDist 0.9.1 / CSBDeep 0.8.1 API.
+numpy==1.26.4
+scipy==1.14.1
+scikit-image==0.25.2
+matplotlib==3.9.4
+stardist==0.9.1
+csbdeep==0.8.1
+tensorflow==2.15.1
+keras==2.15.0
+numba==0.61.2

@@ -1,21 +1,29 @@
 # Trạng thái kiểm tra trước khi nộp
 
-Tài liệu này phân biệt rõ artefact đã sinh với giới hạn của từng thí nghiệm;
-không thay thế output thực tế bằng số liệu giả định.
+Cập nhật 24/10/2026. Danh mục file chính: `SUBMISSION.md`.
 
-| Yêu cầu đề bài | Bằng chứng trong repository | Trạng thái |
+| Hạng mục | Bằng chứng | Trạng thái/giới hạn |
 |---|---|---|
-| Lý thuyết sâu về instance segmentation, CNN, probability map, star-convex và NMS | `docs/01_ly_thuyet_stardist.md`, Chương 2 và công thức/thuật toán trong `report/report.tex` | Hoàn thành: có mô hình toán, U-Net đa head, ray distance, loss, NMS, Otsu/Watershed và metric |
-| Tham chiếu Fiji/ImageJ và plugin chuẩn hoá | `fiji/scripts/FijiStarDistRunner.java`, `fiji/run_log_dsb2018_reference.csv`, protocol/macro; slide 7 | Hoàn thành: chạy artifact StarDist ImageJ/Fiji 0.3.0 trên Java 8/TensorFlow 1.12 CPU |
-| Cài đặt lại bằng Python | `src/xla_gr03/`, CLI, `scripts/run_dsb2018_benchmark.py` | Hoàn thành |
-| So sánh StarDist với Otsu/Watershed | `results/dsb2018_benchmark/summary_metrics.csv`, figures, label TIFF | Hoàn thành trên 50 test images |
-| Đánh giá định lượng | Python/baseline: `results/dsb2018_benchmark/` (50 test); Fiji/ImageJ: `results/fiji_reference/` (3 ca chọn trước) | Hoàn thành, có per-image CSV, mean ± SD, TIFF label và provenance |
-| Ảnh minh hoạ không chọn lọc | `qualitative_low.png`, `qualitative_median.png`, `qualitative_high.png`; TIFF label tương ứng | Hoàn thành |
-| Minh chứng workflow Fiji/ImageJ | `results/fiji_reference/fiji_workflow_evidence.png` sinh từ TIFF input/label, ground truth, CSV metric và run log | Hoàn thành: input → normalize → label TIFF → overlay → metric/runtime |
-| Dataset tái lập | `data/dsb2018/dsb2018/` gồm 497 cặp TIFF (447 train, 50 test) | Hoàn thành: versioned; ZIP nguồn trùng lặp không commit |
-| Kiểm thử code | `tests/`, `pytest -q`, `ruff check src tests scripts`; Java runner được biên dịch và chạy ra TIFF thật | Hoàn thành: 23 tests passed; ruff và biên dịch Java runner đều pass |
-| Báo cáo khoảng 30 trang | `report/report.tex`, `report/report.pdf`, bảng/ảnh/code listing/reference | Hoàn thành: 52 trang; bìa đã ghi tên và MSSV thành viên |
-| Slide trình bày đầy đủ | `slides/stardist_presentation_submission_v8.pptx` (25 slide) và [Canva Presentation 23 slide](https://www.canva.com/d/dXSeOCrNIgRyJam) | Hoàn thành: có lý thuyết, Python, Fiji/ImageJ, ảnh workflow/label/overlay thực tế, benchmark n=50 và Fiji reference n=3 tách biệt |
+| Lý thuyết | `docs/01_ly_thuyet_stardist.md`, báo cáo | Đã nêu NMS overlap theo diện tích nhỏ hơn, khác IoU đánh giá |
+| Python | `src/xla_gr03/`, CLI/scripts | Pretrained inference, geometry/metric tham chiếu tự viết; chưa train CNN |
+| Benchmark | `results/dsb2018_benchmark/` | 50 test images, validation Watershed tách biệt, clip=False; CSV/figure chạy lại |
+| Đối chiếu Fiji–Python | `results/cross_platform/` | Matching trực tiếp, IoU/Dice, ID-invariant pixel agreement, overlay lỗi; low chưa đạt tiêu chí mô tả |
+| Validation ablation | `results/validation_ablation/` | 30 ảnh cố định × 10 cấu hình; mean/SD, FP/FN, count, MAE, hai biểu đồ và ví dụ ngưỡng |
+| Tái lập dữ liệu/model | `dataset_manifest.csv`, `validation_images.csv`, provenance, freeze | 497 cặp TIFF; hash ảnh/mask/weight; xác nhận train/test không trùng hash ảnh |
+| Runtime | CSV/provenance | Python/baseline đo tiền xử lý + inference + hậu xử lý sau warm-up; file I/O tách riêng; không xếp hạng với Fiji cold command |
+| Java/Fiji chạy lại | `fiji/pom.xml`, `scripts/run_fiji_reference.py`, `results/fiji_rerun/` | Dựng Maven, chạy Java 8/TensorFlow JNI 1.12 trên macOS Intel; ba mảng label trùng hoàn toàn output lịch sử |
+| Tests | `tests/`, CI hai jobs | 39 tests đạt khi chạy cả unit và integration; model thật và đối chiếu thư viện chuẩn; coverage gộp 88% |
+| Báo cáo | `report/report.tex`, PDF, `report/generated/` | Bảng sinh từ CSV, thêm RQ2/RQ3 và giới hạn; font TeX Gyre Termes |
+| Slide | `slides/latex/main.pdf` | 27 slide Beamer 16:9; nguồn `slides/latex/`, biểu đồ PGFPlots, hình thật; PDF đã render kiểm tra. PPTX giữ làm tùy chọn |
 
-Kết quả Fiji/ImageJ là 3 ca low/median/high được chọn trước từ test split; không
-được coi là benchmark 50 ảnh hay dùng để xếp hạng trực tiếp với các dòng 50 ảnh.
+## Giới hạn được công bố
+
+- Độc lập giữa dữ liệu train của weight pretrained và 50 test ID chưa xác minh,
+  dù train/test TIFF của repo không trùng hash. Không khẳng định tổng quát hoá độc lập.
+- Java histogram percentiles/chặn âm khác NumPy linear percentiles; boundary và
+  TensorFlow khác nhau. Hai triển khai không cho output đồng nhất ở mọi ca.
+- Fiji ba ca là sample chọn theo score ở lần chạy cũ, được giữ cố định, không
+  phải mẫu ngẫu nhiên và không thay benchmark 50 ảnh.
+- Macro GUI vẫn là protocol tương tác. Đường batch đầy đủ là Maven/Java runner.
+- Không có yêu cầu gốc/rubric kèm repo để xác nhận tiêu chí bắt buộc tự train.
+- Canva cũ chưa đồng bộ; bộ nộp hiện tại dùng PPTX trong `SUBMISSION.md`.

@@ -30,6 +30,7 @@ def _build_parser() -> argparse.ArgumentParser:
     segment.add_argument("--custom-model-dir", type=Path)
     segment.add_argument("--pmin", type=float, default=1.0)
     segment.add_argument("--pmax", type=float, default=99.8)
+    segment.add_argument("--clip", action="store_true", help="Clip normalized input to [0, 1].")
     segment.add_argument("--prob-thresh", type=float)
     segment.add_argument("--nms-thresh", type=float)
     segment.add_argument("--n-tiles", type=int, nargs=2, metavar=("Y", "X"))
@@ -69,6 +70,7 @@ def _segment(args: argparse.Namespace) -> int:
             custom_model_dir=args.custom_model_dir,
             pmin=args.pmin,
             pmax=args.pmax,
+            clip=args.clip,
             prob_thresh=args.prob_thresh,
             nms_thresh=args.nms_thresh,
             n_tiles=tuple(args.n_tiles) if args.n_tiles else None,

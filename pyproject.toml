@@ -21,7 +21,7 @@ dependencies = [
 stardist = [
   "csbdeep>=0.8.1",
   "stardist>=0.9.1",
-  "tensorflow>=2.16",
+  "tensorflow>=2.15,<2.16; python_version < '3.12'",
 ]
 dev = [
   "pytest>=8",
@@ -36,8 +36,9 @@ xla-gr03 = "xla_gr03.cli:main"
 where = ["src"]
 
 [tool.pytest.ini_options]
-addopts = "-ra --strict-markers --cov=xla_gr03 --cov-report=term-missing"
+addopts = "-ra --strict-markers -m 'not integration' --cov=xla_gr03 --cov-report=term-missing"
 testpaths = ["tests"]
+markers = ["integration: requires real StarDist/TensorFlow and pretrained weight download"]
 
 [tool.ruff]
 line-length = 100

@@ -56,6 +56,9 @@ node_modules/
 tmp/
 .*.log
 fiji/scripts/*.class
+fiji/target/
+results/fiji_rerun/*.log
+.codex-finalizer/
 slides/stardist_presentation.pptx
 slides/stardist_presentation_submission.pptx
 slides/stardist_presentation_submission_v2.pptx
@@ -72,3 +75,13 @@ report/*.out
 report/*.toc
 report/*.lof
 report/*.lot
+
+# Beamer auxiliaries; main.pdf is versioned
+slides/latex/*.aux
+slides/latex/*.log
+slides/latex/*.nav
+slides/latex/*.snm
+slides/latex/*.toc
+slides/latex/*.out
+slides/latex/*.vrb
+slides/latex/*.xdv

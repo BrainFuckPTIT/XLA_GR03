@@ -300,13 +300,13 @@ cần giữ MAE có trọng số như trên [1,9].
 tối hoặc quá sáng. Với hai percentile $q_{\min}$ và $q_{\max}$:
 
 $$
-I'(p)=\mathrm{clip}\left(
-\frac{I(p)-q_{\min}}{q_{\max}-q_{\min}+\varepsilon},0,1
-\right).
+I'(p)=\frac{I(p)-q_{\min}}{q_{\max}-q_{\min}+\varepsilon}.
 $$
 
-Các percentile, kênh ảnh, phép resize và bit depth phải giống nhau giữa Fiji
-và Python nếu muốn kiểm chứng kết quả công bằng.
+Python dùng percentile NumPy tuyến tính và `clip=False`, giá trị có thể nằm ngoài [0,1].
+Java CSBDeep dùng histogram percentile và chặn âm về 0 dù `clip=false`;
+khác biệt này phải ghi trong protocol và đo trên output, không giả định đồng nhất.
+Giữ nguyên kênh ảnh, phép resize và bit depth.
 
 ### 2.6.2. Tạo candidate
 

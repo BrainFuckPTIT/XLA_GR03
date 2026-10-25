@@ -1,0 +1,8 @@
+{
+  "name": "xla-gr03-presentation",
+  "private": true,
+  "type": "module",
+  "scripts": { "build": "node build_deck.mjs" },
+  "engines": { "node": ">=22" },
+  "peerDependencies": { "@oai/artifact-tool": "2.8.103" }
+}

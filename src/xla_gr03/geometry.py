@@ -27,7 +27,9 @@ def normalized_edt(labels: ArrayLike) -> NDArray[np.float32]:
     """Compute an Euclidean distance target normalized per object instance.
 
     Background is zero. Every positive object is transformed independently and
-    divided by its own maximum, matching the definition used by StarDist.
+    divided by its own maximum. Image edges are not assumed to be background,
+    matching StarDist's treatment of truncated objects. A full-frame instance
+    is the exceptional case where background outside the image is assumed.
     """
 
     label_array = _validate_labels(labels)
@@ -36,8 +38,11 @@ def normalized_edt(labels: ArrayLike) -> NDArray[np.float32]:
         if object_id == 0:
             continue
         mask = label_array == object_id
-        padded = np.pad(mask, 1, mode="constant", constant_values=False)
-        distance = ndi.distance_transform_edt(padded)[1:-1, 1:-1]
+        if np.all(mask):
+            padded = np.pad(mask, 1, mode="constant", constant_values=False)
+            distance = ndi.distance_transform_edt(padded)[1:-1, 1:-1]
+        else:
+            distance = ndi.distance_transform_edt(mask)
         maximum = float(distance[mask].max(initial=0.0))
         if maximum > 0:
             probability[mask] = distance[mask] / maximum

@@ -84,3 +84,16 @@ python -m xla_gr03 evaluate data/ground_truth/image_001.tif `
 
 `results/tables/final_metrics_template.csv` là schema để nộp. Số liệu điền
 vào file đó phải xuất phát từ CSV script, không gõ tay từ ảnh chụp.
+
+## Thực thi đã chốt ngày 24/10/2026
+
+- Benchmark 50 ảnh dùng model defaults, normalization NumPy không clipping,
+  runtime tính cả tiền xử lý và hậu xử lý sau warm-up, không tính file I/O.
+- `results/cross_platform/` so trực tiếp hai output theo image ID, không dùng
+  điểm tương tự với ground truth để suy ra đồng nhất Fiji–Python. Ca low chưa đạt.
+- `results/validation_ablation/` có sweep 5 probability và 5 NMS trên 30 ảnh
+  validation đã chốt. Giữ nguyên threshold test, không tune theo test.
+- Ba ca low/median/high là lựa chọn theo score ở lần chạy lịch sử, không phải
+  ảnh ngẫu nhiên và không được chọn lại sau khi sửa pipeline.
+- Mean/SD và bảng hiện tại sinh từ CSV bằng `scripts/build_report_data.py`.
+  Dataset manifest và provenance ghi hash, split, môi trường và giới hạn model.

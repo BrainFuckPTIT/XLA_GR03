@@ -82,3 +82,17 @@ def test_load_model_pretrained_and_custom_directory(monkeypatch, tmp_path) -> No
 def test_load_model_rejects_unknown_pretrained_name() -> None:
     with pytest.raises(ValueError, match="Unknown pretrained model"):
         _load_model("not-a-stardist-model", None)
+
+
+def test_rgb_tiles_include_the_unsplit_channel_axis(monkeypatch):
+    class RGBModel:
+        thresholds = _Thresholds()
+
+        def predict_instances(self, image, **kwargs):
+            assert kwargs["axes"] == "YXC"
+            assert kwargs["n_tiles"] == (2, 3, 1)
+            return np.zeros(image.shape[:2], np.int32), {}
+
+    monkeypatch.setattr("xla_gr03.stardist_pipeline._load_model", lambda *_: RGBModel())
+    result = segment_stardist(np.ones((8, 8, 3)), n_tiles=(2, 3))
+    assert result.labels.shape == (8, 8)
