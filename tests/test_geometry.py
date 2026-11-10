@@ -33,6 +33,14 @@ def test_cardinal_star_distances_for_square_center() -> None:
     np.testing.assert_allclose(distances[4, 4], [3.0, 3.0, 3.0, 3.0])
 
 
+def test_edt_does_not_invent_background_at_a_truncated_image_edge():
+    labels = np.zeros((10, 10), dtype=np.int32)
+    labels[:5, :5] = 1
+    probability = normalized_edt(labels)
+    assert probability[0, 0] == pytest.approx(1)
+    assert probability[4, 4] == pytest.approx(0.2)
+
+
 def test_decode_polygon_and_shoelace_area() -> None:
     polygon = decode_polygon((5, 8), [2, 2, 2, 2])
 

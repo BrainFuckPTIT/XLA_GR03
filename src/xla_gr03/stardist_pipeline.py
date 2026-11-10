@@ -52,6 +52,7 @@ def segment_stardist(
     prob_thresh: float | None = None,
     nms_thresh: float | None = None,
     n_tiles: tuple[int, int] | None = None,
+    clip: bool = False,
 ) -> SegmentationResult:
     """Normalize an image and perform StarDist 2D instance segmentation."""
 
@@ -77,6 +78,7 @@ def segment_stardist(
         pmin=pmin,
         pmax=pmax,
         axes=normalization_axes,
+        clip=clip,
     )
     predict_options: dict[str, object] = {"axes": axes}
     if prob_thresh is not None:
@@ -84,7 +86,7 @@ def segment_stardist(
     if nms_thresh is not None:
         predict_options["nms_thresh"] = nms_thresh
     if n_tiles is not None:
-        predict_options["n_tiles"] = n_tiles
+        predict_options["n_tiles"] = n_tiles + (1,) if array.ndim == 3 else n_tiles
 
     labels, details = model.predict_instances(normalized, **predict_options)
     effective_prob = prob_thresh if prob_thresh is not None else float(model.thresholds.prob)
@@ -93,6 +95,8 @@ def segment_stardist(
         "model": str(Path(custom_model_dir).resolve()) if custom_model_dir else model_name,
         "pmin": pmin,
         "pmax": pmax,
+        "clip": clip,
+        "normalization": "numpy percentile per channel; CSBDeep affine; eps=1e-20",
         "prob_thresh": effective_prob,
         "nms_thresh": effective_nms,
         "n_tiles": n_tiles,

@@ -60,7 +60,8 @@ sang `uint32`.
 
 ## Kiểm thử
 
-Unit test dùng fake model nên không phải tải weight StarDist và không cần GPU;
+Unit test dùng fake model. Job integration riêng (`pytest -m integration`) chạy model thật,
+đối chiếu matching, normalization và geometry với thư viện chính thức. Bộ test cơ sở không cần weight;
 điều này giúp CI nhẹ, nhanh và ổn định. Test bao phủ wrapper, validation tham
 số và metadata threshold. Inference thật cũng đã chạy trong benchmark DSB2018
 50 ảnh test bằng model pretrained; kết quả được lưu ở
@@ -70,7 +71,7 @@ số và metadata threshold. Inference thật cũng đã chạy trong benchmark 
 
 - Chỉ hỗ trợ ảnh 2D/YXC, phù hợp phạm vi Fiji StarDist 2D.
 - Chưa có train/fine-tune CNN; hiện dùng model pretrained.
-- Runtime là CPU Windows sau warm-up; benchmark chưa đại diện cho GPU, WSL2 hay
-  mọi domain ảnh.
+- Lần chạy hiện tại dùng CPU macOS Intel. Runtime tính tiền xử lý, inference và hậu xử lý sau warm-up;
+  không đại diện cho GPU hoặc mọi domain ảnh.
 - Reference polygon overlap được rasterize nên là xấp xỉ theo pixel.
-- Cấu hình YAML là hồ sơ tham số; CLI chưa tự đọc YAML ở phiên bản đầu.
+- Tham số lấy từ CLI/constants và được ghi trong provenance. YAML không dùng đã được bỏ.

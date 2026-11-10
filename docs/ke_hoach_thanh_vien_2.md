@@ -36,7 +36,7 @@ viện.
 - `src/xla_gr03/`: package Python.
 - `tests/`: unit test cho hình học, metric, preprocessing và baseline.
 - `pyproject.toml`: dependency, CLI và cấu hình công cụ.
-- `configs/default.yaml`: cấu hình thí nghiệm mặc định.
+- CLI/constants và provenance: nguồn tham số thực tế (YAML không dùng đã bỏ).
 - `.github/workflows/ci.yml`: kiểm tra tự động.
 
 ## Công việc tiếp theo khi có dataset

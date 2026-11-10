@@ -52,3 +52,32 @@ def test_empty_pair_is_well_defined() -> None:
     assert metrics.true_objects == 0
     assert metrics.predicted_objects == 0
     assert metrics.panoptic_quality == 0.0
+
+
+@pytest.mark.parametrize("merge", [False, True])
+def test_split_and_merge_require_one_to_one_matching(merge):
+    whole = np.ones((4, 4), dtype=np.int32)
+    halves = whole.copy()
+    halves[:, 2:] = 2
+    true, pred = (halves, whole) if merge else (whole, halves)
+    metric = evaluate_instances(true, pred, 0.5)
+    assert metric.true_positives == 1
+    assert metric.false_negatives == int(merge)
+    assert metric.false_positives == int(not merge)
+    assert evaluate_instances(true, pred, 0.50001).true_positives == 0
+
+
+def test_assignment_prioritizes_valid_pairs_over_total_iou(monkeypatch):
+    # Diagonal IoU has larger sum but only one accepted match. Off-diagonal has two.
+    monkeypatch.setattr(
+        "xla_gr03.metrics.intersection_over_union_matrix",
+        lambda *_: np.array([[0.99, 0.5], [0.5, 0.49]]),
+    )
+    metric = evaluate_instances(_two_objects(), _two_objects(), 0.5)
+    assert metric.true_positives == 2
+    assert metric.mean_matched_iou == 0.5
+
+
+def test_zero_iou_threshold_does_not_match_disjoint_objects():
+    with pytest.raises(ValueError, match="threshold"):
+        evaluate_instances(_two_objects(), _two_objects(), 0)

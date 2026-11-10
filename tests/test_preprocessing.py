@@ -24,3 +24,17 @@ def test_percentile_normalize_constant_image_is_finite() -> None:
 
     assert np.all(np.isfinite(normalized))
     assert np.all(normalized == 0)
+
+
+def test_normalization_preserves_percentile_outliers_by_default():
+    image = np.arange(100, dtype=np.float32).reshape(10, 10)
+    normalized = percentile_normalize(image, pmin=10, pmax=90)
+    assert normalized.min() == pytest.approx(-0.125)
+    assert normalized.max() == pytest.approx(1.125)
+    assert percentile_normalize(image, pmin=10, pmax=90, clip=True).max() == 1
+
+
+@pytest.mark.parametrize("image", [np.array([]), np.array([[np.nan]])])
+def test_normalization_rejects_invalid_pixels(image):
+    with pytest.raises(ValueError, match="finite"):
+        percentile_normalize(image)

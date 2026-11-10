@@ -1,13 +1,21 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { Presentation, PresentationFile } from "@oai/artifact-tool";
+import { fileURLToPath } from "node:url";
 
-const workspaceDir = "D:/BTL_XLA";
-const SKILL_DIR = "C:/Users/nguye/.codex/plugins/cache/openai-primary-runtime/presentations/26.909.12148/skills/presentations";
-const RUNTIME_PYTHON = "C:/Users/nguye/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe";
+const workspaceDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const SKILL_DIR = process.env.PRESENTATIONS_SKILL_DIR;
+const RUNTIME_PYTHON = process.env.ARTIFACT_PYTHON;
+const moduleDir = process.env.ARTIFACT_NODE_MODULES;
+if (!SKILL_DIR || !RUNTIME_PYTHON || !moduleDir) {
+  throw new Error("Set PRESENTATIONS_SKILL_DIR, ARTIFACT_PYTHON and ARTIFACT_NODE_MODULES. See slides/README.md.");
+}
+process.env.RUNTIME_NODE_MODULES ??= moduleDir;
+const { Presentation, PresentationFile } = await import(pathToFileURL(
+  path.join(moduleDir, "@oai/artifact-tool/dist/artifact_tool.mjs"),
+).href);
 const buildDir = path.join(workspaceDir, ".slides-build");
-const finalPath = path.join(workspaceDir, "slides", "stardist_presentation_submission_v8.pptx");
+const finalPath = path.join(workspaceDir, "slides", "stardist_presentation_completed.pptx");
 
 await fs.mkdir(buildDir, { recursive: true });
 await fs.mkdir(path.dirname(finalPath), { recursive: true });
@@ -16,7 +24,13 @@ const { resolvePresentationFont, applyPresentationChartFont, finalizePresentatio
   pathToFileURL(path.join(SKILL_DIR, "container_tools/artifact_tool_utils.mjs")).href,
 );
 
-const font = resolvePresentationFont();
+const data = JSON.parse(await fs.readFile(path.join(workspaceDir, "report/generated/slide_data.json"), "utf8"));
+const methods = ["Otsu", "Watershed", "StarDist Python"];
+const summaryAt = (method) => data.summary.find(r => r.method === method && r.threshold === 0.5);
+const star = summaryAt("StarDist Python");
+const f3 = n => Number(n).toFixed(3);
+const chartNumber = n => Number(Number(n).toPrecision(12));
+const font = resolvePresentationFont({ fontFamily: "Arial" });
 const deck = Presentation.create({ slideSize: { width: 1280, height: 720 } });
 
 const navy = "#0B1F3A";
@@ -95,8 +109,9 @@ function sequence(slide, number, heading, body, left, top, width, fill = pale) {
   rect(slide, left, top, width, 116, fill, line);
   rect(slide, left + 18, top + 18, 42, 42, navy, navy);
   txt(slide, String(number), left + 18, top + 24, 42, 24, { size: 18, color: white, bold: true, align: "center" });
-  txt(slide, heading, left + 78, top + 17, width - 96, 28, { size: 20, color: navy, bold: true });
-  txt(slide, body, left + 78, top + 50, width - 96, 48, { size: 16, color: muted });
+  const dark = fill === "#16345C";
+  txt(slide, heading, left + 78, top + 17, width - 96, 28, { size: 20, color: dark ? white : navy, bold: true });
+  txt(slide, body, left + 78, top + 50, width - 96, 48, { size: 16, color: dark ? "#D4E2F4" : muted });
 }
 
 function codeBlock(slide, lines, left, top, width, height) {
@@ -109,10 +124,10 @@ function stat(slide, value, label, left, top, width, color = blue) {
   txt(slide, label, left, top + 52, width, 42, { size: 16, color: muted, align: "center" });
 }
 
-function compareColumn(slide, heading, body, left, fill, headingColor = navy) {
-  rect(slide, left, 188, 338, 308, fill, line);
-  txt(slide, heading, left + 24, 218, 290, 34, { size: 25, color: headingColor, bold: true, align: "center" });
-  txt(slide, body, left + 32, 278, 274, 160, { size: 19, color: ink, align: "center" });
+function compareColumn(slide, heading, body, left, fill, headingColor = navy, top = 188, height = 308) {
+  rect(slide, left, top, 338, height, fill, line);
+  txt(slide, heading, left + 24, top + 20, 290, 34, { size: height < 200 ? 22 : 25, color: headingColor, bold: true, align: "center" });
+  txt(slide, body, left + 32, top + 70, 274, height - 90, { size: height < 200 ? 17 : 19, color: ink, align: "center" });
 }
 
 // 01 - cover
@@ -183,7 +198,7 @@ function compareColumn(slide, heading, body, left, fill, headingColor = navy) {
 // 06 - StarDist flow
 {
   const s = deck.slides.add();
-  title(s, "StarDist 2D: pipeline từ ảnh đến instance label", 6, "Backbone CNN tạo prediction dày đặc, hậu xử lý biến prediction thành polygon có ID.");
+  title(s, "StarDist 2D: từ ảnh đến nhãn instance", 6, "Backbone CNN tạo prediction dày đặc, hậu xử lý biến prediction thành polygon có ID.");
   const steps = [["Ảnh TIFF", "I"], ["Normalize", "percentile"], ["U-Net", "shared features"], ["Hai head", "p và rₖ"], ["NMS", "polygon"], ["Label TIFF", "ID 1..N"]];
   steps.forEach(([head, body], i) => {
     const x = 60 + i * 202;
@@ -203,11 +218,11 @@ function compareColumn(slide, heading, body, left, fill, headingColor = navy) {
   const s = deck.slides.add();
   title(s, "Tiền xử lý: percentile normalization", 7);
   rect(s, 72, 166, 530, 300, paleBlue, line);
-  txt(s, "I_norm(q) = clip((I(q) - Q₁(I)) / (Q₉₉.₈(I) - Q₁(I) + ε), 0, 1)", 100, 230, 474, 66, { size: 24, color: navy, bold: true, align: "center" });
-  txt(s, "Q₁ và Q₉₉.₈ là percentile của ảnh. ε tránh chia cho 0. Clip giới hạn dữ liệu về [0,1].", 112, 325, 450, 80, { size: 19, color: ink, align: "center" });
+  txt(s, "I_norm(q) = (I(q) - Q₁(I)) / (Q₉₉.₈(I) - Q₁(I) + ε)", 100, 230, 474, 66, { size: 24, color: navy, bold: true, align: "center" });
+  txt(s, "Python dùng percentile NumPy tuyến tính, ε = 10⁻²⁰, clip=False. Giá trị có thể nằm ngoài [0,1].", 112, 325, 450, 80, { size: 19, color: ink, align: "center" });
   rect(s, 680, 166, 528, 300, pale, line);
   txt(s, "Quy tắc tái lập", 710, 208, 468, 34, { size: 25, color: teal, bold: true, align: "center" });
-  txt(s, "Fiji và Python cùng dùng 1 / 99.8. Không resize, đổi pixel size hay chuẩn hoá khác chỉ ở một phía.\n\nOutput Label Image vẫn là TIFF integer, không chịu biến đổi intensity này.", 730, 272, 428, 130, { size: 19, color: ink, align: "center" });
+  txt(s, "Cùng percentile đặt trước 1 / 99.8. Java dùng histogram percentile và chặn giá trị âm về 0, nên hai đầu vào chưa giống hệt nhau.\n\nGhi rõ chính sách trong provenance và đo độ khớp output.", 730, 272, 428, 145, { size: 19, color: ink, align: "center" });
   txt(s, "Mục đích: giảm ảnh hưởng outlier sáng/tối và đưa ảnh vào thang cường độ phù hợp model pretrained.", 92, 530, 1096, 42, { size: 21, color: navy, bold: true, align: "center" });
   footer(s, "Tham số được ghi trong run log Fiji và provenance của benchmark Python.");
   notes(s, "Nguồn: report/report.tex, Tiền xử lý và quy ước số học.");
@@ -274,7 +289,7 @@ function compareColumn(slide, heading, body, left, fill, headingColor = navy) {
   sequence(s, 2, "Decode polygon", "Dùng r̂ₖ(q) tạo K đỉnh của proposal tại từng candidate.", 678, 170, 530, pale);
   sequence(s, 3, "Sort theo score", "Xử lý proposal xác suất cao trước để ưu tiên tâm object đáng tin cậy.", 72, 330, 530, paleAmber);
   sequence(s, 4, "NMS + rasterize", "Loại overlap lớn hơn t_nms=0.3, giữ polygon còn lại thành Label Image.", 678, 330, 530, paleTeal);
-  txt(s, "IoU(A,B) = |A ∩ B| / |A ∪ B|. t_p thấp gây nhiều positive giả, t_nms cao dễ giữ proposal trùng lặp.", 90, 557, 1100, 36, { size: 20, color: navy, bold: true, align: "center" });
+  txt(s, "Overlap NMS = |A ∩ B| / min(|A|, |B|). t_p thấp giữ thêm candidate, t_nms cao có thể giữ proposal trùng lặp.", 90, 557, 1100, 36, { size: 20, color: navy, bold: true, align: "center" });
   footer(s, "NMS overlap khi inference khác với IoU threshold dùng để tính TP/FP/FN lúc đánh giá.");
   notes(s, "Nguồn: report/report.tex, Suy luận, candidate filtering và polygon NMS.");
 }
@@ -314,11 +329,11 @@ function compareColumn(slide, heading, body, left, fill, headingColor = navy) {
     title: "Validation AP@0.50 theo min_distance",
     titleTextStyle: { typeface: font, fontSize: 16, fill: navy, bold: true },
     categories: ["3", "5", "7", "9", "11"],
-    series: [{ name: "AP@0.50", values: [0.533, 0.667, 0.704, 0.705, 0.696], line: { style: "solid", fill: teal, width: 3 }, marker: { symbol: "circle", size: 6 } }],
+    series: [{ name: "AP@0.50", values: data.watershed.map(r => chartNumber(r.ap_iou_050_mean)), line: { style: "solid", fill: teal, width: 3 }, marker: { symbol: "circle", size: 6 } }],
     hasLegend: false,
     xAxis: { title: "min_distance", textStyle: { typeface: font, fontSize: 13, fill: muted } },
     yAxis: { min: 0.45, max: 0.8, majorUnit: 0.1, textStyle: { typeface: font, fontSize: 13, fill: muted }, majorGridlines: { style: "solid", fill: line, width: 1 } },
-    dataLabels: { showValue: true, position: "outEnd", textStyle: { typeface: font, fontSize: 12, fill: ink, bold: true } },
+    dataLabels: { showValue: true, numberFormatCode: "0.000", position: "outEnd", textStyle: { typeface: font, fontSize: 12, fill: ink, bold: true } },
   });
   applyPresentationChartFont(chart, { fontFamily: font });
   rect(s, 810, 384, 338, 180, paleAmber, line);
@@ -334,7 +349,7 @@ function compareColumn(slide, heading, body, left, fill, headingColor = navy) {
   title(s, "Đánh giá instance: IoU, Hungarian matching, TP/FP/FN", 14);
   sequence(s, 1, "Bỏ nền ID=0", "Lấy mỗi GT Gᵢ và prediction Pⱼ là một object.", 72, 164, 530, pale);
   sequence(s, 2, "Ma trận IoU", "Jᵢⱼ = |Gᵢ ∩ Pⱼ| / |Gᵢ ∪ Pⱼ| cho mọi cặp object.", 678, 164, 530, paleBlue);
-  sequence(s, 3, "Ghép một-một", "Hungarian assignment tối đa tổng IoU, không cho một object ghép nhiều lần.", 72, 324, 530, paleTeal);
+  sequence(s, 3, "Ghép một-một", "Ưu tiên số cặp đạt ngưỡng, rồi tổng IoU. Mỗi object chỉ ghép một lần.", 72, 324, 530, paleTeal);
   sequence(s, 4, "Phân loại", "Cặp có Jᵢⱼ ≥ τ là TP. GT chưa ghép là FN, prediction chưa ghép là FP.", 678, 324, 530, paleAmber);
   txt(s, "Một prediction gộp hai nhân chỉ ghép được tối đa một GT. Nhân còn lại trở thành FN, nên metric phản ánh lỗi merge/split.", 90, 556, 1100, 38, { size: 19, color: navy, bold: true, align: "center" });
   footer(s, "Ngưỡng τ được báo cáo tại 0.50, 0.75 và 0.90.");
@@ -427,15 +442,15 @@ function compareColumn(slide, heading, body, left, fill, headingColor = navy) {
 // 21 - commands
 {
   const s = deck.slides.add();
-  title(s, "Cài đặt Python: chạy pipeline, đánh giá và kiểm thử", 21);
+  title(s, "Python: chạy pipeline và kiểm thử", 21);
   txt(s, "1. Tạo môi trường và cài dependency", 72, 154, 520, 30, { size: 22, color: navy, bold: true });
-  codeBlock(s, "python -m venv .venv\n.venv\\Scripts\\python.exe -m pip install -e \".[dev,stardist]\"", 72, 198, 538, 110);
+  codeBlock(s, "python -m venv .venv\npython -m pip install -r requirements-model.txt\npython -m pip install -e \".[dev]\"", 72, 198, 538, 110);
   txt(s, "2. Phân đoạn và đánh giá một ảnh", 670, 154, 530, 30, { size: 22, color: navy, bold: true });
   codeBlock(s, "xla-gr03 segment input.tif output.tif --method otsu\nxla-gr03 evaluate ground_truth.tif output.tif --thresholds 0.5 0.75 0.9", 670, 198, 538, 110);
   txt(s, "3. Sinh benchmark và bằng chứng Fiji", 72, 366, 520, 30, { size: 22, color: navy, bold: true });
   codeBlock(s, "python scripts/run_dsb2018_benchmark.py\npython scripts/evaluate_fiji_reference.py\npython scripts/build_fiji_workflow_evidence.py", 72, 410, 538, 132);
   txt(s, "4. Kiểm thử chất lượng mã", 670, 366, 530, 30, { size: 22, color: navy, bold: true });
-  codeBlock(s, ".venv\\Scripts\\python.exe -m pytest -q\n.venv\\Scripts\\ruff.exe check src tests scripts\n\nKết quả hiện có: 23 tests passed, coverage 89%.", 670, 410, 538, 132);
+  codeBlock(s, ".venv\\Scripts\\python.exe -m pytest -q\n.venv\\Scripts\\ruff.exe check src tests scripts\n\npytest -m integration  # model thật + thư viện chuẩn", 670, 410, 538, 132);
   footer(s, "Code, CSV, TIFF labels, provenance và figure được lưu dưới results/ để tái lập.");
   notes(s, "Nguồn: README.md, pyproject.toml, scripts/ và test log của repository.");
 }
@@ -449,16 +464,19 @@ function compareColumn(slide, heading, body, left, fill, headingColor = navy) {
     title: "AP@0.50 và PQ@0.50",
     titleTextStyle: { typeface: font, fontSize: 18, fill: navy, bold: true },
     categories: ["Otsu", "Watershed", "StarDist Python"],
-    series: [{ name: "AP@0.50", values: [0.643, 0.715, 0.853], fill: blue }, { name: "PQ@0.50", values: [0.627, 0.677, 0.785], fill: cyan }],
+    series: [{ name: "AP@0.50", values: methods.map(m => chartNumber(summaryAt(m).accuracy_mean)), fill: blue }, { name: "PQ@0.50", values: methods.map(m => chartNumber(summaryAt(m).panoptic_quality_mean)), fill: cyan }],
     barOptions: { direction: "column", grouping: "clustered", gapWidth: 44 },
     hasLegend: true,
     legend: { position: "bottom", textStyle: { typeface: font, fontSize: 13, fill: muted } },
     xAxis: { textStyle: { typeface: font, fontSize: 13, fill: muted } },
     yAxis: { min: 0, max: 1, majorUnit: 0.2, textStyle: { typeface: font, fontSize: 13, fill: muted }, majorGridlines: { style: "solid", fill: line, width: 1 } },
-    dataLabels: { showValue: true, position: "outEnd", textStyle: { typeface: font, fontSize: 12, fill: ink, bold: true } },
+    dataLabels: { showValue: true, numberFormatCode: "0.000", position: "outEnd", textStyle: { typeface: font, fontSize: 12, fill: ink, bold: true } },
   });
   applyPresentationChartFont(chart, { fontFamily: font });
-  const summary = [["Method", "Dice", "MAE", "Runtime s/img"], ["Otsu", ".895", "14.06", ".0100"], ["Watershed", ".894", "6.94", ".0238"], ["StarDist Python", ".916", "3.44", ".1120"]];
+  const summary = [["Method", "Dice", "MAE", "Runtime s/img"], ...methods.map(m => {
+    const r = summaryAt(m);
+    return [m, f3(r.foreground_dice_mean), r.count_absolute_error_mean.toFixed(2), r.runtime_s_mean.toFixed(4)];
+  })];
   const table = s.tables.add({ rows: 4, columns: 4, left: 784, top: 176, width: 424, height: 276, values: summary, columnWidths: [154, 78, 76, 116] });
   table.styleOptions = { headerRow: true, bandedRows: true, firstColumn: true };
   table.borders.assign({ style: "solid", fill: line, width: 1 });
@@ -466,7 +484,7 @@ function compareColumn(slide, heading, body, left, fill, headingColor = navy) {
   table.cells.block({ row: 0, column: 0, rowCount: 1, columnCount: 4 }).assign({ textStyle: { typeface: font, fontSize: 14, color: white, bold: true } });
   table.cells.block({ row: 1, column: 0, rowCount: 3, columnCount: 4 }).assign({ textStyle: { typeface: font, fontSize: 15, color: ink } });
   table.cells.block({ row: 3, column: 0, rowCount: 1, columnCount: 4 }).assign({ fill: "#E7F4EE" });
-  txt(s, "Kết luận n=50: StarDist tăng AP/PQ, giảm MAE đếm. Đổi lại runtime CPU cao hơn Watershed vì có CNN và polygon NMS.", 96, 584, 1090, 38, { size: 19, color: navy, bold: true, align: "center" });
+  txt(s, "StarDist có AP/PQ cao hơn và MAE đếm thấp hơn trên split này. Runtime tính cả tiền xử lý sau warm-up.", 96, 584, 1090, 38, { size: 19, color: navy, bold: true, align: "center" });
   footer(s, "Mean trên 50 test images. AP/PQ có SD trong report và results/dsb2018_benchmark/summary_metrics.csv.");
   notes(s, "Nguồn: results/dsb2018_benchmark/summary_metrics.csv; bảng kết quả trong report/report.tex.");
 }
@@ -474,12 +492,12 @@ function compareColumn(slide, heading, body, left, fill, headingColor = navy) {
 // 23 - qualitative median
 {
   const s = deck.slides.add();
-  title(s, "Kết quả định tính: case trung vị", 23, "Case được chọn theo AP@0.50 của StarDist để tránh chỉ chọn ví dụ thuận lợi.");
+  title(s, "Kết quả định tính: ca median cố định", 23, "Giữ image ID từ lần chạy gốc, không chọn lại theo kết quả cập nhật.");
   rect(s, 72, 146, 1136, 250, pale, line);
   s.images.add({ blob: qualitativeMedian, contentType: "image/png", alt: "Case trung vị DSB2018 gồm input ground truth Otsu Watershed StarDist Python", fit: "contain", position: { left: 78, top: 152, width: 1124, height: 238 } });
-  compareColumn(s, "Otsu", "Foreground mask có thể đẹp nhưng nhiều nhân tiếp xúc bị merge thành một component.", 72, paleAmber, amber);
-  compareColumn(s, "Watershed", "EDT marker tách được một phần blob chạm nhau. Sai phụ thuộc min_distance và local maxima.", 471, paleBlue);
-  compareColumn(s, "StarDist Python", "Polygon learned bám mỗi instance tốt hơn trên case này, đồng thời giảm sai số đếm toàn benchmark.", 870, paleTeal, teal);
+  compareColumn(s, "Otsu", "Nhiều nhân tiếp xúc có thể bị gộp thành một component.", 72, paleAmber, amber, 435, 180);
+  compareColumn(s, "Watershed", "Marker EDT tách được một phần blob. Kết quả phụ thuộc min_distance.", 471, paleBlue, navy, 435, 180);
+  compareColumn(s, "StarDist Python", "Polygon learned tách instance và giảm sai số đếm trên benchmark.", 870, paleTeal, teal, 435, 180);
   footer(s, "Màu biểu diễn ID instance, không phải lớp semantic. Evidence: qualitative_median.png.");
   notes(s, "Nguồn: results/dsb2018_benchmark/figures/qualitative_median.png.");
 }
@@ -487,34 +505,74 @@ function compareColumn(slide, heading, body, left, fill, headingColor = navy) {
 // 24 - low case
 {
   const s = deck.slides.add();
-  title(s, "Giới hạn và case khó", 24, "Báo cáo cả case có AP@0.50 thấp để đánh giá không bị cherry-pick.");
+  title(s, "Giới hạn và case khó", 24, "Ca low giữ từ lần chạy gốc. Không khẳng định vẫn thấp nhất trong lần chạy mới.");
   rect(s, 72, 150, 1136, 260, pale, line);
   s.images.add({ blob: qualitativeLow, contentType: "image/png", alt: "Case low DSB2018 gồm input ground truth Otsu Watershed StarDist Python", fit: "contain", position: { left: 78, top: 156, width: 1124, height: 248 } });
-  sequence(s, 1, "Model pretrained", "Có thể lệch với stain, microscope hoặc modality mới nếu không fine-tune.", 72, 460, 350, paleAmber);
+  sequence(s, 1, "Model pretrained", "Weight đã học từ DSB2018. Chưa xác minh độc lập image ID train của weight với test.", 72, 460, 350, paleAmber);
   sequence(s, 2, "Hình học star-convex", "Không phù hợp hình vòng, phân nhánh hoặc lõm sâu dù threshold đúng.", 465, 460, 350, paleBlue);
   sequence(s, 3, "Tái lập cross-platform", "Khác version, normalization, tile hoặc NMS có thể làm label Fiji/Python khác nhau.", 858, 460, 350, paleTeal);
   footer(s, "Hướng phát triển: fine-tuning annotation nội bộ, ablation số tia, robustness noise và đánh giá 3D.");
   notes(s, "Nguồn: results/dsb2018_benchmark/figures/qualitative_low.png; report/report.tex, Đe doạ tới tính hợp lệ.");
 }
 
-// 25 - conclusion
+// 25 - Direct comparison on fixed cases
+{
+  const s = deck.slides.add();
+  title(s, "Đối chiếu trực tiếp Fiji và Python", 25, "Ghép ID một-một trước khi so mask. Python là tham chiếu triển khai, không thay ground truth.");
+  const rows = [["Ca", "N Python", "N Fiji", "F1@.50", "IoU ghép", "Dice"], ...data.cross.map(r =>
+    [r.tag, String(r.python_objects), String(r.fiji_objects), f3(r.f1_iou_050), f3(r.mean_matched_iou), f3(r.foreground_dice)])];
+  const t = s.tables.add({rows:4,columns:6,left:80,top:180,width:1120,height:260,values:rows});
+  t.styleOptions={headerRow:true,bandedRows:true};
+  t.borders.assign({style:"solid",fill:line,width:1});
+  t.cells.block({row:0,column:0,rowCount:1,columnCount:6}).assign({fill:navy,textStyle:{typeface:font,fontSize:23,color:white,bold:true}});
+  t.cells.block({row:1,column:0,rowCount:3,columnCount:6}).assign({textStyle:{typeface:font,fontSize:25,color:ink}});
+  txt(s,"Tiêu chí mô tả: F1 ≥ 0.95 và Dice ≥ 0.95. Median/high đạt, low chưa đạt. Hai object Fiji ở ca low không ghép được với Python.",80,480,1110,70,{size:23,color:coral});
+  txt(s,"Percentile NumPy và histogram Java khác nhau. Java chặn giá trị âm, boundary policy và TensorFlow cũng khác phiên bản.",80,574,1110,66,{size:21,color:ink});
+  notes(s,"Nguồn: results/cross_platform/comparison.csv và error_overlays.png. Không kết luận hai triển khai đồng nhất trên cả ba ca. Ngưỡng mô tả không thay kiểm định tương đương thống kê.");
+}
+
+// 26 - Validation threshold sweep
+{
+  const s = deck.slides.add();
+  title(s,"Ảnh hưởng ngưỡng trên 30 ảnh validation",26,"Test giữ ngưỡng model công bố. Sweep chỉ mô tả hậu xử lý trên các ảnh train-validation đã chốt.");
+  for (const [index,sweep] of ["probability","nms"].entries()) {
+    const rows=data.ablation.filter(r=>r.sweep===sweep);
+    const chart=s.charts.add("line",{
+      position:{left:72+index*590,top:175,width:550,height:340},
+      title:sweep === "probability" ? "Probability threshold" : "NMS threshold",
+      categories:rows.map(r=>String(r.value)),
+      series:[{name:"AP@0.50",values:rows.map(r=>chartNumber(r.accuracy_mean)),line:{fill:blue,width:3},marker:{symbol:"circle",size:6}}],
+      hasLegend:false,
+      xAxis:{textStyle:{typeface:font,fontSize:16,fill:ink}},
+      yAxis:{min:0.7,max:0.95,textStyle:{typeface:font,fontSize:16,fill:ink}},
+    });
+    applyPresentationChartFont(chart,{fontFamily:font});
+  }
+  txt(s,"Tăng probability 0.3 lên 0.7: AP 0.864 xuống 0.777, số object trung bình 35.47 xuống 31.50, FN tăng 3.13 lên 6.47.",80,550,1110,72,{size:24,color:navy});
+  footer(s,"Mean trên cùng 30 ảnh. SD, FP/FN và MAE đầy đủ trong CSV. CNN maps tái sử dụng, không báo runtime inference của sweep.");
+  notes(s,"Nguồn: results/validation_ablation/summary_metrics.csv, provenance.json. Biểu đồ có SD trong báo cáo và PNG kèm repo. NMS cố định 0.3 khi quét probability, probability cố định 0.479071 khi quét NMS.");
+}
+
+// 27 - conclusion
 {
   const s = deck.slides.add();
   s.background.fill = navy;
   txt(s, "Kết luận", 80, 76, 600, 54, { size: 40, color: white, bold: true });
   sequence(s, 1, "Thuật toán", "StarDist biến probability map và K ray distances thành polygon instance qua NMS.", 80, 170, 526, "#16345C");
-  sequence(s, 2, "Thực nghiệm", "StarDist Python đạt AP@.50 .853 và PQ .785 trên DSB2018 n=50, cao hơn hai baseline.", 674, 170, 526, "#16345C");
+  sequence(s, 2, "Thực nghiệm", `StarDist Python đạt AP@.50 ${f3(star.accuracy_mean)} và PQ ${f3(star.panoptic_quality_mean)} trên DSB2018 n=50.`, 674, 170, 526, "#16345C");
   sequence(s, 3, "Fiji/ImageJ", "Plugin thật tạo Label TIFF, run log và metric n=3 để kiểm chứng workflow cross-platform.", 80, 340, 526, "#16345C");
   sequence(s, 4, "Tái lập", "Repo có dataset versioned, Python package, Java runner, macro, test, CSV, TIFF và figures.", 674, 340, 526, "#16345C");
   txt(s, "Thông điệp chính: đánh giá instance phải dùng matching theo object. Foreground Dice một mình không đủ kết luận khả năng tách đối tượng.", 100, 570, 1080, 46, { size: 21, color: cyan, bold: true, align: "center" });
   txt(s, "Cảm ơn", 80, 652, 200, 26, { size: 17, color: "#D4E2F4" });
-  notes(s, "Tổng kết từ report/report.tex và toàn bộ artefact repository.");
+  notes(s, "Nguồn: report/generated/slide_data.json; benchmark provenance ghi máy, phiên bản, hash model/dataset. Kết quả pretrained trên split DSB2018, chưa xác minh độc lập train/test của weight.");
 }
 
-const candidatePath = path.join(buildDir, "candidate_v8.pptx");
+const candidatePath = path.join(buildDir, "candidate_completed.pptx");
 await (await PresentationFile.exportPptx(deck)).save(candidatePath);
 const result = await finalizePresentation({
-  explicitTotalSlideCount: 25,
+  explicitTotalSlideCount: 27,
+  requiredNativeTableOwnerSlides: [22, 25],
+  requiredNativeChartOwnerSlides: [22, 26],
   materializeLiteralChartWorkbooks: true,
   workspaceDir,
   candidatePath,
@@ -522,11 +580,15 @@ const result = await finalizePresentation({
   pythonExecutable: RUNTIME_PYTHON,
   integrityValidatorPath: path.join(SKILL_DIR, "container_tools/inspect_presentation_package_integrity.py"),
   layoutValidatorPath: path.join(SKILL_DIR, "container_tools/inspect_presentation_layout_geometry.py"),
-  layoutArgs: ["--expected-slide-size-emu", "12192000,6858000", "--validate-bullet-geometry", "--validate-heading-fit"],
+  layoutArgs: ["--expected-slide-size-emu", "12192000,6858000", "--validate-bullet-geometry", "--validate-heading-fit", "--require-native-table-slide", "22", "--require-native-table-slide", "25"],
   fontPolicy: { basis: "design", families: [font] },
   verifyArtifactToolImport: true,
-  receiptPath: path.join(buildDir, "validation_submission_v8.json"),
+  receiptPath: path.join(buildDir, `validation_${Date.now()}.json`),
 });
+for (const [index, slide] of deck.slides.items.entries()) {
+  const preview = await slide.export({format:"png",scale:1});
+  await fs.writeFile(path.join(buildDir,`slide_${String(index+1).padStart(2,"0")}.png`), new Uint8Array(await preview.arrayBuffer()));
+}
 const montage = await deck.export({ format: "webp", montage: true, scale: 1 });
-await fs.writeFile(path.join(buildDir, "montage_v8.webp"), new Uint8Array(await montage.arrayBuffer()));
+await fs.writeFile(path.join(buildDir, "montage_completed.webp"), new Uint8Array(await montage.arrayBuffer()));
 console.log(JSON.stringify({ finalPath, result }, null, 2));

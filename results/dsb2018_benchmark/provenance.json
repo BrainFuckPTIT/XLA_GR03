@@ -7,5 +7,39 @@
   "stardist_model": "2D_versatile_fluo",
   "stardist_threshold_policy": "model default thresholds; no test-set tuning",
   "device": "CPU",
-  "qualitative_selection": "min/median/max StarDist AP@0.50 over all test images"
+  "runtime_scope": "normalization+inference+postprocessing; excludes I/O/load/warmup",
+  "normalization": {
+    "pmin": 1.0,
+    "pmax": 99.8,
+    "clip": false,
+    "percentile": "numpy linear",
+    "eps": 1e-20
+  },
+  "pretrained_test_independence": "not verified against weight training IDs",
+  "qualitative_selection": "fixed historical cases; no reselection after rerun",
+  "environment": {
+    "python": "3.11.9",
+    "platform": "macOS-15.7-x86_64-i386-64bit",
+    "machine": "x86_64",
+    "cpu": "Intel(R) Core(TM) i5-8257U CPU @ 1.40GHz",
+    "packages": {
+      "numpy": "1.26.4",
+      "scipy": "1.14.1",
+      "scikit-image": "0.25.2",
+      "tifffile": "2026.3.3",
+      "tensorflow": "2.15.1",
+      "stardist": "0.9.1",
+      "csbdeep": "0.8.1",
+      "keras": "2.15.0",
+      "matplotlib": "3.9.4"
+    },
+    "tensorflow_devices": [
+      "/physical_device:CPU:0"
+    ],
+    "model_files_sha256": {
+      "config.json": "836da16282c3e0db1ba2e58f377e977419887ace8c737ebde16a094d58d50f74",
+      "thresholds.json": "5cd6aac6e923f8659b63a9e297485920d45a59dad35371ddb8b6ae4be398d805",
+      "weights_best.h5": "42202bd269c8106782316f1a2c75afb3f5ffa65e525c2e155ee0ced3a95da349"
+    }
+  }
 }

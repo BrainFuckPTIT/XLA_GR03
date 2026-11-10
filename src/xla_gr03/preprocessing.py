@@ -29,23 +29,27 @@ def percentile_normalize(
     pmin: float = 1.0,
     pmax: float = 99.8,
     axes: Sequence[int] | None = None,
-    clip: bool = True,
+    clip: bool = False,
 ) -> NDArray[np.float32]:
     """Normalize an image using robust percentiles.
 
     By default all axes are normalized jointly. For a YXC RGB image, pass
     ``axes=(0, 1)`` to normalize every channel independently, matching the usual
-    StarDist/CSBDeep convention.
+    StarDist/CSBDeep convention. Values outside the percentile range remain
+    outside [0, 1] unless clipping is explicitly requested. This follows the
+    Python CSBDeep policy; Java histogram percentiles can still differ.
     """
 
     if not 0 <= pmin < pmax <= 100:
         raise ValueError("Require 0 <= pmin < pmax <= 100.")
 
     array = np.asarray(image, dtype=np.float32)
+    if array.size == 0 or not np.all(np.isfinite(array)):
+        raise ValueError("Image must be non-empty and contain only finite values.")
     reduce_axes = tuple(range(array.ndim)) if axes is None else tuple(axes)
     low = np.percentile(array, pmin, axis=reduce_axes, keepdims=True)
     high = np.percentile(array, pmax, axis=reduce_axes, keepdims=True)
-    normalized = (array - low) / np.maximum(high - low, np.finfo(np.float32).eps)
+    normalized = (array - low) / (high - low + 1e-20)
     if clip:
         normalized = np.clip(normalized, 0.0, 1.0)
     return normalized.astype(np.float32, copy=False)

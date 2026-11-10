@@ -4,5 +4,32 @@
   "sample_count": 1,
   "caveat": "Demonstration only. This single image is not an independent test set.",
   "model": "2D_versatile_fluo",
-  "random_seed": 42
+  "random_seed": 42,
+  "normalization_clip": false,
+  "runtime_scope": "warm preprocessing+inference+postprocessing; no I/O",
+  "environment": {
+    "python": "3.11.9",
+    "platform": "macOS-15.7-x86_64-i386-64bit",
+    "machine": "x86_64",
+    "cpu": "Intel(R) Core(TM) i5-8257U CPU @ 1.40GHz",
+    "packages": {
+      "numpy": "1.26.4",
+      "scipy": "1.14.1",
+      "scikit-image": "0.25.2",
+      "tifffile": "2026.3.3",
+      "tensorflow": "2.15.1",
+      "stardist": "0.9.1",
+      "csbdeep": "0.8.1",
+      "keras": "2.15.0",
+      "matplotlib": "3.9.4"
+    },
+    "tensorflow_devices": [
+      "/physical_device:CPU:0"
+    ],
+    "model_files_sha256": {
+      "config.json": "836da16282c3e0db1ba2e58f377e977419887ace8c737ebde16a094d58d50f74",
+      "thresholds.json": "5cd6aac6e923f8659b63a9e297485920d45a59dad35371ddb8b6ae4be398d805",
+      "weights_best.h5": "42202bd269c8106782316f1a2c75afb3f5ffa65e525c2e155ee0ced3a95da349"
+    }
+  }
 }

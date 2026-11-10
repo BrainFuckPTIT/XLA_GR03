@@ -19,10 +19,12 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+import tensorflow as tf
 from stardist.models import StarDist2D
 from tifffile import imread
 
 from xla_gr03.baselines import segment_otsu, segment_watershed
+from xla_gr03.experiments import dataset_manifest, paired_images, runtime_provenance
 from xla_gr03.io import save_labels
 from xla_gr03.metrics import evaluate_at_thresholds, evaluate_instances
 from xla_gr03.preprocessing import percentile_normalize
@@ -62,13 +64,7 @@ def ensure_dataset() -> None:
 def paired_files(split: str) -> list[tuple[Path, Path]]:
     image_dir = DATASET_ROOT / split / "images"
     mask_dir = DATASET_ROOT / split / "masks"
-    pairs = [(path, mask_dir / path.name) for path in sorted(image_dir.glob("*.tif"))]
-    missing = [mask for _, mask in pairs if not mask.is_file()]
-    if missing:
-        raise RuntimeError(f"Missing {len(missing)} masks in {mask_dir}")
-    if not pairs:
-        raise RuntimeError(f"No TIFF pairs found in {image_dir}")
-    return pairs
+    return paired_images(image_dir, mask_dir)
 
 
 def choose_watershed_distance(
@@ -97,10 +93,10 @@ def choose_watershed_distance(
 def predict_stardist(
     model: StarDist2D, image: np.ndarray
 ) -> tuple[np.ndarray, float, float, float]:
-    normalized = percentile_normalize(image, pmin=1.0, pmax=99.8, axes=(0, 1))
     probability_threshold = float(model.thresholds.prob)
     nms_threshold = float(model.thresholds.nms)
     start = time.perf_counter()
+    normalized = percentile_normalize(image, pmin=1.0, pmax=99.8, axes=(0, 1), clip=False)
     labels, _ = model.predict_instances(
         normalized,
         axes="YX",
@@ -150,7 +146,9 @@ def make_summary(rows: list[dict[str, object]]) -> list[dict[str, object]]:
                 "foreground_dice_mean": avg("foreground_dice"),
                 "foreground_dice_sd": sd("foreground_dice"),
                 "count_absolute_error_mean": avg("count_absolute_error"),
+                "count_absolute_error_sd": sd("count_absolute_error"),
                 "runtime_s_mean": avg("runtime_s"),
+                "runtime_s_sd": sd("runtime_s"),
             }
         )
     return summary
@@ -209,13 +207,14 @@ def save_qualitative_panel(
         axis.imshow(array, cmap="gray" if title == "Input" else "nipy_spectral")
         axis.set_title(title)
         axis.axis("off")
-    figure.suptitle(f"Representative {tag} case selected by StarDist AP@0.50", y=1.02)
+    figure.suptitle(f"Fixed historical {tag} case (image IDs not reselected)", y=1.02)
     figure.tight_layout()
     figure.savefig(RESULTS / "figures" / f"qualitative_{tag}.png", dpi=200, bbox_inches="tight")
     plt.close(figure)
 
 
 def main() -> None:
+    tf.config.set_visible_devices([], "GPU")
     ensure_dataset()
     RESULTS.mkdir(parents=True, exist_ok=True)
     (RESULTS / "figures").mkdir(exist_ok=True)
@@ -225,6 +224,13 @@ def main() -> None:
     )
     validation = [all_train[index] for index in sorted(validation_indices)]
     test = paired_files("test")
+    manifest = dataset_manifest(all_train, "train") + dataset_manifest(test, "test")
+    train_hashes = {r["image_sha256"] for r in manifest if r["split"] == "train"}
+    test_hashes = {r["image_sha256"] for r in manifest if r["split"] == "test"}
+    if train_hashes & test_hashes:
+        raise ValueError("Identical images occur in train and test splits.")
+    write_csv(RESULTS / "dataset_manifest.csv", manifest)
+    write_csv(RESULTS / "validation_images.csv", [{"image": p.name} for p, _ in validation])
     selected_distance, validation_rows = choose_watershed_distance(validation)
     write_csv(RESULTS / "watershed_validation_sweep.csv", validation_rows)
 
@@ -233,6 +239,7 @@ def main() -> None:
     predict_stardist(model, imread(test[0][0]))
     rows: list[dict[str, object]] = []
     for image_path, mask_path in test:
+        print(f"Benchmark {image_path.name}", flush=True)
         image = imread(image_path)
         truth = imread(mask_path)
         runs: list[tuple[str, np.ndarray, float, dict[str, object]]] = []
@@ -256,6 +263,7 @@ def main() -> None:
                     "model": "2D_versatile_fluo",
                     "pmin": 1.0,
                     "pmax": 99.8,
+                    "clip": False,
                     "probability_threshold": probability_threshold,
                     "nms_threshold": nms_threshold,
                 },
@@ -284,11 +292,15 @@ def main() -> None:
         ),
         key=lambda row: float(row["accuracy"]),
     )
-    selected_positions = {"low": 0, "median": len(stardist_ap) // 2, "high": -1}
+    # Keep the historical Fiji cases fixed so reruns never break their paired reference.
+    historical = ROOT / "fiji" / "run_log_dsb2018_reference.csv"
+    with historical.open(newline="", encoding="utf-8") as stream:
+        fixed_cases = list(csv.DictReader(stream))
     image_index = {path.name: path for path, _ in test}
     selected_rows: list[dict[str, object]] = []
-    for tag, position in selected_positions.items():
-        row = stardist_ap[position]
+    for case in fixed_cases:
+        tag = case["tag"]
+        row = next(r for r in stardist_ap if r["image"] == case["image"])
         image_path = image_index[str(row["image"])]
         save_qualitative_panel(image_path, selected_distance, model, tag)
         selected_rows.append(
@@ -297,7 +309,7 @@ def main() -> None:
                 "image": image_path.name,
                 "stardist_ap_iou_050": row["accuracy"],
                 "selection_rule": (
-                    "min, median, or max StarDist AP@0.50 over the complete test split"
+                    "fixed historical min/median/max from original clipped run; not reselected"
                 ),
             }
         )
@@ -313,7 +325,17 @@ def main() -> None:
                 "stardist_model": "2D_versatile_fluo",
                 "stardist_threshold_policy": "model default thresholds; no test-set tuning",
                 "device": "CPU",
-                "qualitative_selection": "min/median/max StarDist AP@0.50 over all test images",
+                "runtime_scope": "normalization+inference+postprocessing; excludes I/O/load/warmup",
+                "normalization": {
+                    "pmin": 1.0,
+                    "pmax": 99.8,
+                    "clip": False,
+                    "percentile": "numpy linear",
+                    "eps": 1e-20,
+                },
+                "pretrained_test_independence": "not verified against weight training IDs",
+                "qualitative_selection": "fixed historical cases; no reselection after rerun",
+                "environment": runtime_provenance(model),
             },
             ensure_ascii=False,
             indent=2,

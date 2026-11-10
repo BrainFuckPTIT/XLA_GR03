@@ -37,3 +37,18 @@ jobs:
 
       - name: Run unit tests
         run: pytest
+
+  stardist-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install reproducible model environment
+        run: |
+          python -m pip install -r requirements-model.txt
+          python -m pip install -e ".[dev]"
+      - name: Real inference, matching and geometry reference checks
+        run: pytest -m integration
