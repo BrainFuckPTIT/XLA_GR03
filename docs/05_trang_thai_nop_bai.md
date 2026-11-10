@@ -14,7 +14,7 @@ Cập nhật 24/10/2026. Danh mục file chính: `SUBMISSION.md`.
 | Java/Fiji chạy lại | `fiji/pom.xml`, `scripts/run_fiji_reference.py`, `results/fiji_rerun/` | Dựng Maven, chạy Java 8/TensorFlow JNI 1.12 trên macOS Intel; ba mảng label trùng hoàn toàn output lịch sử |
 | Tests | `tests/`, CI hai jobs | 39 tests đạt khi chạy cả unit và integration; model thật và đối chiếu thư viện chuẩn; coverage gộp 88% |
 | Báo cáo | `report/report.tex`, PDF, `report/generated/` | Bảng sinh từ CSV, thêm RQ2/RQ3 và giới hạn; font TeX Gyre Termes |
-| Slide | `slides/latex/main.pdf` | 27 slide Beamer 16:9; nguồn `slides/latex/`, biểu đồ PGFPlots, hình thật; PDF đã render kiểm tra. PPTX giữ làm tùy chọn |
+| Slide | `slides/latex/main.pdf` | 18 slide Beamer 16:9; nguồn `slides/latex/`, biểu đồ PGFPlots, hình thật; PDF đã render kiểm tra. PPTX giữ làm tùy chọn |
 
 ## Giới hạn được công bố
 
@@ -27,3 +27,5 @@ Cập nhật 24/10/2026. Danh mục file chính: `SUBMISSION.md`.
 - Macro GUI vẫn là protocol tương tác. Đường batch đầy đủ là Maven/Java runner.
 - Không có yêu cầu gốc/rubric kèm repo để xác nhận tiêu chí bắt buộc tự train.
 - Canva cũ chưa đồng bộ; bộ nộp hiện tại dùng PPTX trong `SUBMISSION.md`.
+
+- Dice foreground đo độc lập bằng API ImageJ 1.53t headless và Python trên ba ca; kết quả lưu tại `results/fiji_reference/imagej_dice.csv`. AP/PQ vẫn do Python tính.

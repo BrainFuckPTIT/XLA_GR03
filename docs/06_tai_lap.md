@@ -53,7 +53,7 @@ code listing và BibTeX nằm ở các thư mục anh em của `report/`.
 
 ## Slide
 
-Bản chính là Beamer 27 trang. Thư mục `slides/latex/` đóng gói đủ nguồn,
+Bản chính là Beamer 18 trang. Thư mục `slides/latex/` đóng gói đủ nguồn,
 font sử dụng từ TeX, ảnh và bảng; không cần môi trường model để biên dịch:
 
 ```bash

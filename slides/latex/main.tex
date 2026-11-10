@@ -17,20 +17,6 @@
 \end{frame}
 
 \section{01 / BÀI TOÁN VÀ THIẾT KẾ THÍ NGHIỆM}
-\begin{frame}{Kết quả chính: tách đúng từng nhân}
-\begin{columns}[T]
-\column{.57\textwidth}
-{\fontsize{48}{52}\selectfont\color{Teal}\bfseries\StarAP}\par
-AP@0.50 của StarDist trên 50 ảnh test.
-\par\vspace{3mm}
-\lead{Cao hơn Watershed 0.131 điểm}
-Sai số đếm trung bình: \textbf{\StarMAE{} nhân/ảnh}.
-\column{.39\textwidth}
-\includegraphics[width=\linewidth,height=43mm,keepaspectratio]{assets/crop_stardist_python.png}
-\end{columns}\par
-\notefoot{Phạm vi: suy luận bằng mô hình pretrained; không huấn luyện lại. Chưa xác minh mức trùng lặp giữa dữ liệu huấn luyện weight và test split. Nguồn: summary\_metrics.csv, $n=50$.}
-\end{frame}
-
 \begin{frame}{Từ vùng tiền cảnh đến từng đối tượng}
 \pic{.30}{crop_input.png}{Ảnh huỳnh quang}\hfill
 \pic{.30}{crop_binary.png}{Semantic: nhân / nền}\hfill
@@ -103,16 +89,6 @@ Mỗi vị trí dự đoán một xác suất $p$ và $R$ khoảng cách xuyên 
 \notefoot{Sơ đồ dùng 8 tia cho dễ đọc. Mô hình sử dụng trong thực nghiệm dự đoán 32 tia. Nguồn: Schmidt et al., MICCAI 2018.}
 \end{frame}
 
-\begin{frame}{Xác suất mục tiêu và xác suất dự đoán}
-\begin{columns}[T]
-\column{.48\textwidth}\centering
-\includegraphics[height=35mm]{assets/crop_edt.png}\par\textbf{Target: EDT chuẩn hóa}\par\small Khoảng cách đến nền, chuẩn hóa riêng trong từng instance; nền bằng 0.
-\column{.48\textwidth}\centering
-\includegraphics[height=35mm]{assets/crop_probability.png}\par\textbf{Prediction: đầu xác suất CNN}\par\small Giá trị học được; tâm nhân thường có điểm cao hơn vùng sát biên.
-\end{columns}\par
-\notefoot{EDT là mục tiêu huấn luyện, không phải xác suất dự đoán. EDT tính trên GT đầy đủ rồi mới cắt; hai bản đồ dùng thang viridis từ 0 đến 1.}
-\end{frame}
-
 \begin{frame}{Một backbone, hai đầu ra}
 \centering
 \begin{tikzpicture}[>=Latex,node distance=8mm,font=\small]
@@ -127,19 +103,6 @@ Mỗi vị trí dự đoán một xác suất $p$ và $R$ khoảng cách xuyên 
 \par\vspace{4mm}
 Đặc trưng nhiều mức kết hợp ngữ cảnh với chi tiết biên. Hai đầu ra cùng mô tả các đa giác ứng viên tại từng vị trí trên lưới.
 \notefoot{Sơ đồ nguyên lý U-Net, không biểu diễn toàn bộ lớp và số filter của checkpoint. Model map provenance được lưu trong generated/model\_map\_provenance.json.}
-\end{frame}
-
-\begin{frame}{Hàm mất mát: học vị trí và hình dạng}
-\[\mathcal{L}=\mathcal{L}_{\mathrm{prob}}+\lambda\mathcal{L}_{\mathrm{dist}}\]
-\begin{columns}[T]
-\column{.47\textwidth}\lead{Xác suất đối tượng}
-\[\mathcal{L}_{\mathrm{prob}}=\operatorname{BCE}(p,\hat p)\]
-Target mềm dựa trên EDT giúp ưu tiên vị trí bên trong đối tượng.
-\column{.49\textwidth}\lead{Khoảng cách xuyên tâm}
-\[\mathcal{L}_{\mathrm{dist}}\propto\sum_{\mathbf{x},k}p(\mathbf{x})\,|r_k-\hat r_k|\]
-Sai số tuyệt đối có trọng số foreground; mô hình học hình dạng từ các tia.
-\end{columns}\par
-\notefoot{Công thức mô tả hai thành phần chính; không khai triển hạng regularization ở nền. Bài tập sử dụng checkpoint pretrained, không báo cáo một quá trình huấn luyện mới. Nguồn: Schmidt et al., 2018.}
 \end{frame}
 
 \begin{frame}{NMS và IoU đánh giá là hai phép đo khác nhau}
@@ -160,18 +123,6 @@ Giữ ứng viên điểm cao, loại ứng viên chồng lấn vượt ngưỡn
 \notefoot{Ví dụ hình vuông chứa nhau, diện tích 9 và 1. Không thay mẫu số của NMS bằng hợp diện tích. Model: prob\_thresh = 0.479071; nms\_thresh = 0.30.}
 \end{frame}
 
-\begin{frame}{Chuẩn hóa cùng percentile, chưa đủ để đồng nhất}
-\[x'=\frac{x-P_1(x)}{P_{99.8}(x)-P_1(x)+\varepsilon}\]
-\begin{columns}[T]
-\column{.47\textwidth}\lead{Python / CSBDeep}
-Percentile nội suy tuyến tính của NumPy.\par Mặc định \texttt{clip=False}: giữ cả giá trị ngoài $[0,1]$.
-\column{.49\textwidth}\lead{Fiji / Java CSBDeep 0.6}
-Percentile từ histogram.\par Chặn dưới tại 0; không chặn trên tại 1 trong cấu hình đã tái lập.
-\end{columns}\par
-\par\vspace{3mm}\textcolor{Red}{\textbf{Hệ quả:}} cùng weight và ngưỡng vẫn có thể cho nhãn khác nhau.
-\notefoot{Cấu hình benchmark lưu normalization metadata. Không suy diễn rằng Python và Java có đầu vào số học hoàn toàn giống nhau.}
-\end{frame}
-
 \section{03 / BASELINE VÀ CÁCH ĐO}
 \begin{frame}{Baseline: từ ngưỡng sáng đến tách vùng chạm}
 \begin{columns}[T]
@@ -179,23 +130,6 @@ Percentile từ histogram.\par Chặn dưới tại 0; không chặn trên tại
 \column{.48\textwidth}\centering\includegraphics[height=33mm]{assets/crop_watershed.png}\par\textbf{Watershed có marker}\par\small Dùng cực đại distance transform để tách; nhạy với vị trí và số marker.
 \end{columns}\par
 \notefoot{Cùng crop của ảnh median. Màu prediction khớp GT khi ghép được tại IoU $\geq0.5$; prediction không khớp tô coral. Tham số min\_distance của Watershed được chọn là 9 trên validation.}
-\end{frame}
-
-\begin{frame}{Ghép một--một để phát hiện lỗi tách và gộp}
-\begin{columns}[c]
-\column{.43\textwidth}\centering
-\begin{tikzpicture}[font=\small]
-\draw[fill=Teal!15,draw=Teal](0,1.5)rectangle(3,2.5);\node at(1.5,2){1 GT};
-\draw[fill=Amber!20,draw=Amber](0,0)rectangle(1.5,1);\draw[fill=Red!15,draw=Red](1.5,0)rectangle(3,1);\node at(.75,.5){P1};\node at(2.25,.5){P2};
-\draw[->,thick,Teal](.75,1.5)--(.75,1.05);\draw[dashed,Red](2.25,1.5)--(2.25,1.05);
-\end{tikzpicture}\par
-\column{.53\textwidth}
-Hai nửa có IoU $=0.5$ với GT. Tại $\tau=0.5$, chỉ một nửa được ghép:
-\[TP=1,\quad FP=1,\quad FN=0\]
-\[F_1=\frac23,\qquad AP_\tau=\frac12\]
-Mask nhị phân vẫn có Dice $=1$.
-\end{columns}\par
-\notefoot{Hungarian tối ưu số cặp đạt ngưỡng trước, sau đó tối ưu IoU; không cho phép nhiều prediction cùng nhận một GT. Ví dụ lý tưởng để phân biệt Dice foreground với chất lượng instance.}
 \end{frame}
 
 \begin{frame}{Mỗi chỉ số trả lời một câu hỏi}
@@ -211,18 +145,6 @@ MAE đếm & $\operatorname{mean}|N_p-N_g|$ & Sai lệch số nhân mỗi ảnh?
 \notefoot{$AP_\tau$ dùng theo StarDist matching accuracy tại một ngưỡng IoU, không phải diện tích dưới đường precision--recall của COCO. Các kết quả tổng hợp là mean trên ảnh.}
 \end{frame}
 
-\begin{frame}{Chọn Watershed trên validation}
-\begin{columns}[c]
-\column{.64\textwidth}
-\begin{tikzpicture}\begin{axis}[width=\linewidth,height=47mm,xlabel={min\_distance (pixel)},ylabel={Mean AP@0.50},xmin=2,xmax=12,ymin=.45,ymax=.76,xtick={3,5,7,9,11}]
-\addplot[Teal,very thick,mark=*] table[x=distance,y=ap]{generated/watershed.dat};
-\addplot[only marks,Red,mark=*,mark size=3pt] coordinates{(9,.708947)};
-\end{axis}\end{tikzpicture}\par
-\column{.32\textwidth}{\Huge\color{Red}\bfseries9}\par min\_distance được chọn\par\par\vspace{3mm}$AP=0.709\pm0.254$\par trên 30 ảnh validation.
-\end{columns}\par
-\notefoot{Đường biểu diễn mean; số $\pm$ là SD giữa các ảnh. Chỉ chọn trong tập \{3,5,7,9,11\}; không dùng test split để điều chỉnh. Nguồn: dsb2018\_benchmark/watershed\_validation\_sweep.csv.}
-\end{frame}
-
 \section{04 / KẾT QUẢ THỰC NGHIỆM}
 \begin{frame}{StarDist dẫn đầu về chất lượng instance}
 \centering
@@ -232,18 +154,6 @@ MAE đếm & $\operatorname{mean}|N_p-N_g|$ & Sai lệch số nhân mỗi ảnh?
 \legend{AP@0.50,PQ@0.50}
 \end{axis}\end{tikzpicture}\par
 \notefoot{Error bar: SD giữa 50 ảnh, không phải khoảng tin cậy. AP StarDist = \StarAP{} $\pm$ \StarAPSD{}; PQ = \StarPQ{} $\pm$ \StarPQSD{}. Nguồn: summary\_metrics.csv.}
-\end{frame}
-
-\begin{frame}{Siết IoU: độ chính xác biên vẫn là thách thức}
-\centering\renewcommand{\arraystretch}{1.55}
-\begin{tabular}{@{}lccc@{}}\toprule
-Phương pháp & AP@0.50 & AP@0.75 & AP@0.90\\\midrule
-\ThresholdRows\bottomrule
-\end{tabular}\par
-\par\vspace{5mm}\par\raggedright
-\lead{Phát hiện đúng chưa đồng nghĩa biên trùng khít.}
-StarDist giữ thứ hạng đầu, nhưng AP giảm còn 0.305 khi yêu cầu IoU $\geq0.90$.
-\notefoot{Mean $\pm$ SD trên cùng 50 ảnh. SD lớn tại ngưỡng cao cho thấy mức độ khác nhau giữa các ảnh; không diễn giải như độ ổn định đã được bảo đảm.}
 \end{frame}
 
 \begin{frame}{Độ trùng vùng, sai số đếm và chi phí tính toán}
@@ -275,7 +185,7 @@ Model 2D\_versatile\_fluo, percentile 1/99.8 và các ngưỡng được ghi rõ
 \par\textcolor{Teal}{\textbf{3/3 nhãn tái chạy trùng từng pixel với nhãn Fiji lịch sử.}}
 \column{.40\textwidth}\centering\includegraphics[height=40mm]{assets/crop_fiji.png}\par\small Nhãn Fiji trên crop median
 \end{columns}\par
-\notefoot{Đây là bằng chứng tái lập Fiji so với Fiji lịch sử, không phải bằng chứng Fiji trùng Python. Kết quả và hash: results/fiji\_rerun/reproduction\_check.csv.}
+\notefoot{Dice foreground tính độc lập bằng API ImageJ headless và Python trùng trên 3 ca; AP/PQ do Python tính. Kết quả và hash: results/fiji\_rerun/reproduction\_check.csv.}
 \end{frame}
 
 \begin{frame}{Fiji--Python: hai ca đạt, một ca cần giải thích}
@@ -317,38 +227,8 @@ Ca & $N_{Py}/N_{Fiji}$ & $F_1$ & Dice\\\midrule
 \end{frame}
 
 \appendix
-\section{PHỤ LỤC / TÁI LẬP VÀ TÀI LIỆU}
-\begin{frame}[fragile]{A1. Tái lập từ repository}
-\small
-\begin{verbatim}
-python -m pip install -e '.[dev]'
-python -m pip install -r requirements-model.txt
-python scripts/verify_submission.py
-python -m pytest
-cd slides/latex
-tectonic main.tex
-\end{verbatim}
-\par\vspace{2mm}Mã lệnh benchmark và Fiji đầy đủ trong \texttt{docs/06\_tai\_lap.md}.\par
-39 test đã kiểm tra logic ghép cặp, hình học, tiling và pipeline; coverage kết hợp 88\% ở lần kiểm tra của bản hoàn thiện.
-\notefoot{Biên dịch slide không cần chạy lại model: PNG và bảng dữ liệu đã đóng gói trong thư mục LaTeX. Cần XeLaTeX hoặc Tectonic; không dùng pdfLaTeX vì font Unicode tiếng Việt.}
-\end{frame}
-
-\begin{frame}{A2. Cấu hình cần giữ cố định}
-\small\renewcommand{\arraystretch}{1.45}
-\begin{tabular}{@{}p{44mm}p{89mm}@{}}\toprule
-Thành phần & Giá trị trong thực nghiệm\\\midrule
-Checkpoint & 2D\_versatile\_fluo; 32 tia\\
-Ngưỡng model & probability = 0.479071; NMS = 0.30\\
-Chuẩn hóa Python & percentile 1 / 99.8; clip=False\\
-Đánh giá & IoU = 0.50 / 0.75 / 0.90; ghép một--một\\
-Watershed & min\_distance = 9; chọn trên 30 ảnh validation\\
-Python model stack & Python 3.11.9; StarDist 0.9.1; TensorFlow 2.15.1\\
-Fiji tái lập & Java 8; TensorFlow native 1.12; cấu hình Maven\\\bottomrule
-\end{tabular}\par
-\notefoot{Hash checkpoint, manifest dữ liệu, cấu hình chạy và môi trường chi tiết được lưu cùng kết quả. Boundary policy được ghi riêng cho từng runtime; không mặc định hai triển khai xử lý biên giống nhau.}
-\end{frame}
-
-\begin{frame}{A3. Tài liệu nền tảng và nguồn kiểm chứng}
+\section{TÀI LIỆU THAM KHẢO}
+\begin{frame}{Tài liệu nền tảng}
 \small
 \textbf{[1]} Schmidt et al. (2018). \emph{Cell Detection with Star-convex Polygons}. MICCAI. DOI: \href{https://doi.org/10.1007/978-3-030-00934-2_30}{10.1007/978-3-030-00934-2\_30}.
 \par\textbf{[2]} Ronneberger et al. (2015). \emph{U-Net: Convolutional Networks for Biomedical Image Segmentation}. MICCAI.

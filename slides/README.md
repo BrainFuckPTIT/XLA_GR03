@@ -1,7 +1,6 @@
 # Slide LaTeX chính
 
-Bản trình chiếu: [`latex/main.pdf`](latex/main.pdf), 27 trang 16:9,
-24 trang nội dung + 3 trang phụ lục. Nguồn độc lập trong [`latex/`](latex/),
+Bản trình chiếu: [`latex/main.pdf`](latex/main.pdf), 18 trang 16:9. Nguồn độc lập trong [`latex/`](latex/),
 gói nguồn [`stardist_beamer_source.zip`](stardist_beamer_source.zip).
 Công thức và sơ đồ là LaTeX/TikZ; bảng và biểu đồ PGFPlots lấy từ CSV.
 Xem [`latex/README.md`](latex/README.md) để biên dịch với Tectonic hoặc XeLaTeX.

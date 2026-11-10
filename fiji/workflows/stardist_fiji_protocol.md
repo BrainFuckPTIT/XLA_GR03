@@ -92,3 +92,18 @@ loader TensorFlow ImageJ 1.12 không tương thích các runtime Java mới hơn
 - [x] Label image 2D có kích thước đúng bằng ground truth.
 - [x] Bảng có AP/accuracy theo IoU, PQ, Dice foreground, sai số đếm, runtime.
 - [x] Ảnh minh hoạ có overlay GT/prediction cho low/median/high.
+
+## Đối chiếu Dice bằng ImageJ và Python
+
+`fiji/scripts/MeasureDice.java` dùng API ImageJ 1.53t đọc các TIFF, tạo
+mask foreground và đếm pixel qua histogram. Kết quả ImageJ headless so với
+evaluator Python lưu tại `results/fiji_reference/imagej_dice.csv`. Cả ba ca
+trùng ít nhất 10 chữ số thập phân; AP/PQ vẫn do evaluator Python tính.
+
+```bash
+mkdir -p /tmp/xla-imagej-dice
+javac -cp "$HOME/.m2/repository/net/imagej/ij/1.53t/ij-1.53t.jar" -d /tmp/xla-imagej-dice fiji/scripts/MeasureDice.java
+java -Djava.awt.headless=true -cp "/tmp/xla-imagej-dice:$HOME/.m2/repository/net/imagej/ij/1.53t/ij-1.53t.jar" MeasureDice data/dsb2018/dsb2018/test/masks/608ff81c8a0c8b622f6648a9c7f935d85f0c503f515ef2ac3728387be1953ee8.tif results/fiji_labels/608ff81c8a0c8b622f6648a9c7f935d85f0c503f515ef2ac3728387be1953ee8.tif
+```
+
+JAR là artifact `net.imagej:ij:1.53t`; tải bằng Maven nếu chưa có trong cache.

@@ -65,7 +65,7 @@ def main() -> None:
     beamer = ROOT / "slides/latex"
     pdf = (beamer / "main.pdf").read_bytes()
     assert pdf.startswith(b"%PDF-")
-    assert (beamer / "main.tex").read_text().count(r"\begin{frame}") == 27
+    assert (beamer / "main.tex").read_text().count(r"\begin{frame}") == 18
     assert (beamer / "generated/metrics.tex").is_file()
     with zipfile.ZipFile(ROOT / "slides/stardist_beamer_source.zip") as archive:
         for path in beamer.rglob("*"):
@@ -77,7 +77,7 @@ def main() -> None:
         assert len(xml.findall("p:sldIdLst/p:sldId", namespace)) == 27
     print(
         "Verified: 450 benchmark rows, 497 hashed pairs, 300 validation rows, "
-        "3 Fiji reproductions, report PDF, 27-slide Beamer/source ZIP and optional PPTX."
+        "3 Fiji reproductions, report PDF, 18-slide Beamer/source ZIP and optional PPTX."
     )
 
 

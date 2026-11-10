@@ -7,4 +7,4 @@ Phụ lục chỉ dẫn đường dẫn mã nguồn, không in lại toàn bộ 
 
 Biên dịch bằng Tectonic hoặc XeLaTeX từ thư mục `report` (xem `docs/06_tai_lap.md`).
 TeX Gyre Termes hỗ trợ tiếng Việt và không cần font Times New Roman riêng.
-Bản biên tập rút gọn giữ lý thuyết, kết quả, giới hạn và hướng dẫn tái lập.
+Bản báo cáo giải thích thêm phần cài đặt hình học và kết quả đối chiếu Dice bằng ImageJ/Python.

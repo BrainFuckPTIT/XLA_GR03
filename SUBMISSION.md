@@ -6,7 +6,7 @@ Các đường dẫn dưới đây là bản chính, đồng bộ từ lần ch�
 |---|---|
 | Báo cáo | `report/report.pdf` |
 | Nguồn báo cáo | `report/report.tex`, `report/generated/`, `references/references.bib` |
-| Slide | `slides/latex/main.pdf` (27 slide, 16:9) |
+| Slide | `slides/latex/main.pdf` (18 slide, 16:9) |
 | Nguồn slide | `slides/latex/` (Beamer, TikZ, PGFPlots), `slides/stardist_beamer_source.zip` |
 | Code và kiểm thử | `src/xla_gr03/`, `scripts/`, `tests/`, `.github/workflows/ci.yml` |
 | Môi trường Python | `requirements-model.txt`, `environment.yml`, freeze trong benchmark |

@@ -166,7 +166,7 @@ Một tập $S$ là star-convex đối với điểm $c$ nếu mọi đoạn th�
 $x\in S$ đều nằm trong $S$, tức $[c,x]\subseteq S$. Đối với một pixel
 foreground $q$ và $K$ hướng đều nhau $\theta_k=2\pi k/K$, target radial là
 \begin{equation}
- r_k(q)=\max\{t\ge0:q+t(\cos\theta_k,\sin\theta_k)\in G(q)\},
+ r_k(q)=\sup\{t\ge0:q+s(\cos\theta_k,\sin\theta_k)\in G(q)\ \forall s\in[0,t]\},
  \quad k=0,\ldots,K-1,
  \label{eq:ray-distance}
 \end{equation}
@@ -321,6 +321,34 @@ overlay prediction/ground truth và tham số/runtime từ log.}
 \label{fig:fiji-workflow}
 \end{figure}
 
+\subsection{Đo định lượng trong Fiji và giới hạn hiện tại}
+Fiji có thể đo diện tích foreground từ nhãn TIFF: chuyển bản sao ground truth
+và prediction thành mask nhị phân, dùng phép AND để tạo giao; trên từng mask
+chọn \texttt{Analyze > Set Measurements > Area}, rồi đo diện tích bằng
+\texttt{Analyze > Measure}. Tính Dice foreground từ diện tích giao và hai
+foreground theo công thức ở Mục~\ref{sec:matching}. Cần cùng kích thước,
+không nội suy nhãn khi thay đổi hiển thị, và ghi rõ đơn vị pixel hoặc đơn vị
+đã hiệu chuẩn. Đếm nhãn cần loại nền và đếm ID dương duy nhất; không mặc định
+mỗi vùng liên thông là một instance nếu nhãn bị phân mảnh.
+
+Nhóm đã đo foreground Dice độc lập bằng API ImageJ 1.53t ở chế độ headless.
+Chương trình \path{fiji/scripts/MeasureDice.java} đọc TIFF nhãn, tạo mask
+nhị phân và đếm pixel foreground, pixel giao bằng histogram của ImageJ. Bảng
+sau đối chiếu với evaluator Python trên cùng ground truth và nhãn Fiji:
+\begin{center}
+\begin{tabular}{lrr}\toprule
+Ca & Dice ImageJ & Dice Python\\\midrule
+low & 0.937569 & 0.937569\\
+median & 0.944456 & 0.944456\\
+high & 0.969284 & 0.969284\\\bottomrule
+\end{tabular}
+\end{center}
+Hai cách đo trùng đến ít nhất 10 chữ số thập phân trên ba ca; số pixel và
+kết quả đầy đủ lưu tại \path{results/fiji_reference/imagej_dice.csv}. Đây là
+đo bằng API ImageJ headless, không phải thao tác thủ công trong giao diện Fiji.
+AP, PQ và matching instance trong bài vẫn do evaluator Python tính; Dice
+foreground không thay thế đánh giá instance.
+
 \section{Kiểm chứng Fiji--Python}
 Metric Fiji so với ground truth được lưu tại \path{results/fiji_reference/};
 đối chiếu trực tiếp Fiji--Python tại \path{results/cross_platform/}.
@@ -337,6 +365,64 @@ Unit tests bao phủ geometry, metric, preprocessing, I/O và baseline.
 Nhóm tự cài đặt EDT chuẩn hoá theo instance, ray distance, polygon decode,
 polygon NMS raster hoá, IoU matrix và hàm đánh giá instance dùng bộ giải Hungarian của SciPy. Các hàm geometry là bản tham chiếu giáo dục, chưa thay hậu xử lý chính thức trong inference. CNN pretrained và hậu xử lý suy luận dùng thư viện StarDist chính thức
 \citep{stardist_repository}.
+
+\clearpage
+\section{Cài đặt các bước hình học}
+Các hàm trong \path{src/xla_gr03/geometry.py} minh họa các thành phần
+hình học của StarDist. Đầu vào là ảnh nhãn nguyên 2D, trong đó 0 là nền và
+mỗi số nguyên dương xác định một nhân. Hàm kiểm tra số chiều, kiểu số nguyên
+và giá trị không âm trước khi xử lý.
+
+\subsection{Bản đồ khoảng cách chuẩn hóa}
+Với mỗi nhãn $m$, tạo mask $M_m(q)=1$ khi $Y(q)=m$ và bằng 0 ở các vị trí
+khác. Biến đổi khoảng cách Euclid cho biết khoảng cách từ pixel trong mask
+đến pixel nền gần nhất. Giá trị đích tại mỗi instance là
+\begin{equation}
+p_m(q)=\frac{D_m(q)}{\max_{u\in M_m} D_m(u)},\qquad q\in M_m.
+\end{equation}
+Nền nhận giá trị 0. Chuẩn hóa theo từng nhân giúp các nhân lớn và nhỏ cùng có
+cực đại bằng 1. Khi instance chạm biên ảnh, triển khai không tự coi toàn bộ
+vùng ngoài ảnh là nền; trường hợp một instance phủ kín ảnh được xử lý riêng.
+
+\subsection{Tia, đa giác và NMS tham chiếu}
+Với mỗi pixel foreground, hàm \texttt{star\_distances} duyệt các hướng cách đều,
+tăng khoảng cách theo bước lấy mẫu và dừng khi vượt ảnh hoặc gặp nhãn khác.
+Mỗi dãy khoảng cách được giải mã thành các đỉnh theo công thức (2.5), sau đó
+raster hóa để kiểm tra diện tích và chồng lấn. Cách duyệt từng pixel, từng tia
+ưu tiên minh bạch, phù hợp ảnh nhỏ và kiểm thử; nó không thay thế hậu xử lý tối
+ưu của thư viện trong benchmark. Việc làm tròn tọa độ và bước lấy mẫu có thể
+làm sai khác biên so với triển khai tối ưu.
+
+NMS tham chiếu sắp proposal theo điểm giảm dần, chọn proposal chưa bị loại và
+so sánh với các proposal còn lại bằng tỉ lệ giao trên diện tích nhỏ hơn. Nếu
+vượt ngưỡng, proposal điểm thấp hơn bị loại. Thứ tự này cần được giữ cố định
+để kết quả có thể kiểm tra lại. Các unit test cho geometry, ghép cặp và nhãn
+nằm trong \path{tests/}; CNN và weight trong benchmark lấy từ StarDist chính thức.
+
+\subsection{Baseline và metric do nhóm lập trình}
+Otsu tạo mask foreground bằng ngưỡng toàn cục, lọc vùng nhỏ rồi gán nhãn các
+thành phần liên thông. Watershed tính EDT của mask, tìm marker bằng cực đại địa
+phương và phân vùng trên $-D$ trong phạm vi foreground. Các hàm xuất TIFF nhãn
+nguyên và dùng chung evaluator. Bộ đánh giá tạo ma trận IoU, ghép một--một bằng
+Hungarian, sau đó tính TP, FP, FN, AP, F1 và PQ tại từng ngưỡng; Dice được
+đo trên hợp foreground. Pipeline và logic matching nằm trong
+\path{src/xla_gr03/} và \path{tests/}.
+
+\subsection{Ví dụ kiểm tra thủ công}
+Giả sử ground truth có một nhân diện tích 100 pixel và prediction tách đúng
+vùng đó thành hai mảnh không giao nhau, mỗi mảnh 50 pixel. Hai IoU bằng 0.5.
+Tại ngưỡng $\tau=0.5$, ghép một--một chỉ chọn được một cặp: $TP=1$, $FP=1$,
+$FN=0$. Vì vậy $F1=2/3$ và $AP_{0.5}=1/2$. Hợp foreground của hai mảnh vẫn
+trùng ground truth nên Dice foreground bằng 1. Ví dụ cho thấy Dice cao không
+phát hiện được lỗi tách instance; các test split/merge kiểm tra riêng tính chất
+này trong bộ metric.
+
+Để kiểm tra NMS, xét proposal $A$ có diện tích 100 và proposal $B$ nằm hoàn
+toàn trong $A$ với diện tích 25 pixel. Overlap StarDist bằng $25/25=1$, còn
+IoU bằng $25/100=0.25$. Nếu ngưỡng NMS là 0.3 và $A$ có điểm cao hơn, $B$ bị
+loại theo overlap. Nếu nhầm IoU đánh giá với overlap NMS, $B$ sẽ bị giữ lại.
+Khi triển khai, cần cố định thứ tự xử lý các proposal và đơn vị tọa độ trước
+khi so sánh các phiên bản.
 
 \section{Môi trường}
 Thực nghiệm dùng Python 3.11.9, TensorFlow 2.15.1 và StarDist 0.9.1 trên

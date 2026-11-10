@@ -1,6 +1,6 @@
 # StarDist — LaTeX Beamer / Nhóm 03
 
-Bản chính: **main.pdf**, 27 trang, 16:9 (24 nội dung + 3 phụ lục).
+Bản chính: **main.pdf**, 18 trang, 16:9.
 Thiết kế dùng TeX Gyre Heros, màu đỏ PTIT, navy và teal; Unicode tiếng Việt.
 Công thức, bảng, TikZ và PGFPlots chỉnh trực tiếp trong nguồn, không phải ảnh chụp.
 
